@@ -24,7 +24,7 @@ def generate_GP_controller(contexts, window_size, partial_observability):
     #print(m.read_trainables())
     #print(m.as_pandas_table())
     
-    #gpflow.train.ScipyOptimizer().minimize(m)
+    gpflow.train.ScipyOptimizer().minimize(m)
     
     #plot(m)
     #print(m.read_trainables())
@@ -81,8 +81,18 @@ def generate_GP_controller(contexts, window_size, partial_observability):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--contexts', type=list, help='Contexts to train on', default=[80.])
+    parser.add_argument('-c', '--contexts', type=int, help='Contexts to train on', default=0)
     parser.add_argument('-ws', '--window_size', type=int, help='Number of time-steps in a moving window', default=1)
     parser.add_argument('-po', '--partial_observability', type=str, help='Partial Observability', default='True')
     args = parser.parse_args()
-    generate_GP_controller(contexts=args.contexts, window_size=args.window_size, partial_observability=str_to_bool(args.partial_observability))
+    if args.contexts == 0:
+        contexts = [80.]
+    elif args.contexts == 1:
+        contexts = [10.]
+    elif args.contexts == 2:
+        contexts = [25.]
+    elif args.contexts == 3:
+        contexts = [50.]
+    else:
+        contexts = [65.]
+    generate_GP_controller(contexts=contexts, window_size=args.window_size, partial_observability=str_to_bool(args.partial_observability))

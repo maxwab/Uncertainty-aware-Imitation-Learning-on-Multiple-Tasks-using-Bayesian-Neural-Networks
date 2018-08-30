@@ -40,6 +40,8 @@ CONTROL_COSTS_LOG_KEY = 'control_costs_log_key'
 CONTROL_DEVIATIONS_LOG_KEY = 'control_deviations_log_key'
 CONTROL_MEANS_LOG_KEY = 'control_means_log_key'
 
+matplotlibcolors = ['black', 'red', 'sienna', 'sandybrown', 'gold', 'olivedrab', 'deepskyblue', 'blue', 'red', 'chartreuse', 'darkcyan']
+
 ##############################################################
 
 MAXIMUM_ACTION_LOG_KEY = 'maximum_action_log_key'
