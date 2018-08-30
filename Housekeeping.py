@@ -1,14 +1,12 @@
-# Don't forget to re-run the expert log and simulator files, if you change any value here.
-
 import numpy as np
 
-INITIALIZATION_STATES = np.array([[-5., -5.], [5., -5.], [2.5, -2.5], [-2.5, 2.5], [-5., 5.], [5., 5.]])
-MAXIMUM_NUMBER_OF_STEPS  = 150
+MAXIMUM_NUMBER_OF_STEPS  = 5
 
 BLOCK_MASSES_TO_TRAIN_ON_1 = np.array([2., 3., 4.])
 BLOCK_MASSES_TO_TRAIN_ON_2 = np.array([52., 53., 54.])
 BLOCK_MASSES_TO_TRAIN_ON_3 = np.array([92., 93., 94.])
 ALL_BLOCK_MASSES_TO_VALIDATE = np.linspace(1., 100., 100)
+INITIALIZATION_STATES_TO_VALIDATE = np.array([[-5., -5.], [5., -5.], [2.5, -2.5], [-2.5, 2.5], [-5., 5.], [5., 5.]])
 
 #Defining colors for highlighting important aspects
 GREEN = lambda x: '\x1b[32m{}\x1b[0m'.format(x)
@@ -19,7 +17,7 @@ INPUT_MANIPULATION_DIRECTORY = './input_manipulation_directory/'
 TENSORBOARD_DIRECTORY = './tensorboard_directory/'
 SAVED_MODELS_DURING_ITERATIONS_DIRECTORY_COPYCAT = './saved_models_during_iterations_copycat/'
 SAVED_FINAL_MODEL_DIRECTORY_COPYCAT = './saved_final_model_copycat/'
-LOGS_DIRECTORY = './logs/'
+LOGS_DIRECTORY = 'logs/'
 
 MEAN_KEY_X = 'mean_key_x'
 DEVIATION_KEY_X = 'deviation_key_x'
@@ -28,9 +26,22 @@ DEVIATION_KEY_Y = 'deviation_key_y'
 OBSERVATION_DIMENSIONS_PER_TIME_STEP_KEY = 'observation_dimensions_per_time_step_key'
 OBSERVATION_WINDOW_SIZE_KEY = 'observation_window_size_key'
 
-COST_LOG_KEY = 'cost_log_key'
-DEVIATION_LOG_KEY = 'deviation_log_key'
-ACTION_TAKEN_LOG_KEY = 'action_taken_log_key'
+
+##############################################################
+
+EXPERIMENT_ID_KEY = 'experiment_id_key'
+CONTROLLER_KEY = 'controller_key'
+CONTEXTS_KEY = 'contexts_key'
+WINDOW_SIZE_KEY = 'window_size_key'
+PARTIAL_OBSERVABILITY_KEY = 'partial_observability_key'
+
+OBSERVATIONS_LOG_KEY = 'observations_log_key'
+CONTROL_COSTS_LOG_KEY = 'control_costs_log_key'
+CONTROL_DEVIATIONS_LOG_KEY = 'control_deviations_log_key'
+CONTROL_MEANS_LOG_KEY = 'control_means_log_key'
+
+##############################################################
+
 MAXIMUM_ACTION_LOG_KEY = 'maximum_action_log_key'
 MINIMUM_ACTION_LOG_KEY = 'minimum_action_log_key'
 POSITION_GAIN_KEY = 'position_gain_key'
@@ -49,9 +60,33 @@ def str_to_bool(s):
 
 
 def randomize(a, b):
-	# Generate the permutation index array.
-	permutation = np.random.permutation(a.shape[0])
-	# Shuffle the arrays by giving the permutation in the square brackets.
-	shuffled_a = a[permutation]
-	shuffled_b = b[permutation]
-	return shuffled_a, shuffled_b
+    # Generate the permutation index array.
+    permutation = np.random.permutation(a.shape[0])
+    # Shuffle the arrays by giving the permutation in the square brackets.
+    shuffled_a = a[permutation]
+    shuffled_b = b[permutation]
+    return shuffled_a, shuffled_b
+
+
+def get_moving_window_size(observation_sample, action_sample, window_size):
+    """This function returns the number of dimensions in the moving window feature and target vectors.
+
+    Args:
+       observation_sample (2-D numpy array):  A sample observation with just one row.
+       action_sample (2-D numpy array): A sample action with just one row
+       window size (int): The number of last time-steps in the moving window
+
+    Returns:
+       int: drift in terms of the number of dimensions in the moving windows feature vector
+       int: number of dimensions in the moving windows feature vector
+       int: number of dimensions in the moving windows target vector
+
+    A way you might use me is
+    >>> get_moving_window_size(observation_sample=np.array([[1., 2., 3.]]), action_sample=np.array([[10., 5.]]), window_size=3)
+    15
+
+    """
+    drift_per_time_step = observation_sample.shape[1]+action_sample.shape[1]+1
+    moving_window_size_x = (window_size-1)*(drift_per_time_step) + observation_sample.shape[1]
+    moving_window_size_y = action_sample.shape[1]
+    return drift_per_time_step, moving_window_size_x, moving_window_size_y
