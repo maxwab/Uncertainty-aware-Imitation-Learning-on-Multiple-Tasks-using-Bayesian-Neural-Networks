@@ -1,6 +1,6 @@
 import numpy as np
 
-MAXIMUM_NUMBER_OF_STEPS  = 50
+MAXIMUM_NUMBER_OF_STEPS  = 30
 
 BLOCK_MASSES_TO_TRAIN_ON_1 = np.array([2., 3., 4.])
 BLOCK_MASSES_TO_TRAIN_ON_2 = np.array([52., 53., 54.])
