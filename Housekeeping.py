@@ -30,15 +30,21 @@ OBSERVATION_WINDOW_SIZE_KEY = 'observation_window_size_key'
 ##############################################################
 
 EXPERIMENT_ID_KEY = 'experiment_id_key'
-CONTROLLER_KEY = 'controller_key'
+BEHAVIORAL_CONTROLLER_KEY = 'behavioral_controller_key'
+TARGET_CONTROLLER_KEY = 'target_controller_key'
 CONTEXTS_KEY = 'contexts_key'
 WINDOW_SIZE_KEY = 'window_size_key'
 PARTIAL_OBSERVABILITY_KEY = 'partial_observability_key'
 
 OBSERVATIONS_LOG_KEY = 'observations_log_key'
-CONTROL_COSTS_LOG_KEY = 'control_costs_log_key'
-CONTROL_DEVIATIONS_LOG_KEY = 'control_deviations_log_key'
-CONTROL_MEANS_LOG_KEY = 'control_means_log_key'
+
+BEHAVIORAL_CONTROL_COSTS_LOG_KEY = 'behavioral_control_costs_log_key'
+BEHAVIORAL_CONTROL_DEVIATIONS_LOG_KEY = 'behavioral_control_deviations_log_key'
+BEHAVIORAL_CONTROL_MEANS_LOG_KEY = 'behavioral_control_means_log_key'
+
+TARGET_CONTROL_COSTS_LOG_KEY = 'target_control_costs_log_key'
+TARGET_CONTROL_DEVIATIONS_LOG_KEY = 'target_control_deviations_log_key'
+TARGET_CONTROL_MEANS_LOG_KEY = 'target_control_means_log_key'
 
 matplotlibcolors = ['black', 'red', 'sienna', 'sandybrown', 'gold', 'olivedrab', 'deepskyblue', 'blue', 'red', 'chartreuse', 'darkcyan']
 
