@@ -1,6 +1,6 @@
 import numpy as np
 
-MAXIMUM_NUMBER_OF_STEPS  = 30
+MAXIMUM_NUMBER_OF_STEPS  = 20
 
 BLOCK_MASSES_TO_TRAIN_ON_1 = np.array([2., 3., 4.])
 BLOCK_MASSES_TO_TRAIN_ON_2 = np.array([52., 53., 54.])
@@ -13,10 +13,10 @@ GREEN = lambda x: '\x1b[32m{}\x1b[0m'.format(x)
 BLUE = lambda x: '\x1b[34m{}\x1b[0m'.format(x)
 RED = lambda x: '\x1b[31m{}\x1b[0m'.format(x)
 
-INPUT_MANIPULATION_DIRECTORY = './input_manipulation_directory/'
-TENSORBOARD_DIRECTORY = './tensorboard_directory/'
-SAVED_MODELS_DURING_ITERATIONS_DIRECTORY_COPYCAT = './saved_models_during_iterations_copycat/'
-SAVED_FINAL_MODEL_DIRECTORY_COPYCAT = './saved_final_model_copycat/'
+INPUT_MANIPULATION_DIRECTORY = 'input_manipulation_directory/'
+TENSORBOARD_DIRECTORY = 'tensorboard_directory/'
+SAVED_MODELS_DURING_ITERATIONS_DIRECTORY_COPYCAT = 'saved_models_during_iterations_copycat/'
+SAVED_FINAL_MODEL_DIRECTORY_COPYCAT = 'saved_final_model_copycat/'
 LOGS_DIRECTORY = 'logs/'
 
 MEAN_KEY_X = 'mean_key_x'
@@ -25,7 +25,6 @@ MEAN_KEY_Y = 'mean_key_y'
 DEVIATION_KEY_Y = 'deviation_key_y'
 OBSERVATION_DIMENSIONS_PER_TIME_STEP_KEY = 'observation_dimensions_per_time_step_key'
 OBSERVATION_WINDOW_SIZE_KEY = 'observation_window_size_key'
-
 
 ##############################################################
 
