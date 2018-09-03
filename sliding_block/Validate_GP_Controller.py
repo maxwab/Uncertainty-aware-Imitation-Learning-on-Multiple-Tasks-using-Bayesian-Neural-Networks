@@ -30,6 +30,7 @@ def validate_GP_controller(contexts, window_size, partial_observability, drift_p
 
     logs_for_all_blocks = {}
     for block_mass in ALL_BLOCK_MASSES_TO_VALIDATE:
+        print(BLUE('Block mass currently being validated is ' + str(block_mass)))
         logs_for_a_block_and_initial_state = {}
         for initial_state in INITIALIZATION_STATES_TO_VALIDATE:
             all_observations = []

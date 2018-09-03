@@ -1,13 +1,17 @@
-from BayesianNNRegression import BBBNNRegression
-from Expert_Trajectories import getExpertDataset
-from Settings import *
-from Utils import *
+from Dataset import getDemonstrationDataset
+from Sliding_Block import *
+from Validate_BBB_Controller import validate_BBB_controller
+
+import sys
+sys.path.insert(0,'./../Task_Agnostic_Online_Multitask_Imitation_Learning/')
+
+from Housekeeping import *
 
 from datetime import datetime
 import tensorflow as tf, argparse, sys, os, copy, _pickle as pickle
 
 
-def runSimulation(env_name, visibility, case, window_size, epochs, number_mini_batches, activation_unit, learning_rate, hidden_units, number_samples_variance_reduction, precision_alpha, weights_prior_mean_1,
+def generate_BBB_controller(contexts, window_size, partial_observability, behavior_controller, target_controller, epochs, number_mini_batches, activation_unit, learning_rate, hidden_units, number_samples_variance_reduction, precision_alpha, weights_prior_mean_1,
 					 weights_prior_mean_2, weights_prior_deviation_1, weights_prior_deviation_2, mixture_pie, rho_mean, extra_likelihood_emphasis):
 
 	directory_to_save_input_manipulation_data = INPUT_MANIPULATION_DIRECTORY + env_name + '/'
@@ -104,17 +108,28 @@ def runSimulation(env_name, visibility, case, window_size, epochs, number_mini_b
 
 
 if __name__ == '__main__':
-	parser = argparse.ArgumentParser()
-	parser.add_argument('-e', '--env', type=str, help='Name ID environment to run', default='SlidingBlock')
-	parser.add_argument('-v', '--visibility', type=str, help='Context Visibility', default='False')
-	parser.add_argument('-c', '--case', type=int, help='Case', default=2)
-	args = parser.parse_args()
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--contexts', type=int, help='Contexts to train on', default=0)
+    parser.add_argument('-ws', '--window_size', type=int, help='Number of time-steps in a moving window', default=1)
+    parser.add_argument('-po', '--partial_observability', type=str, help='Partial Observability', default='True')
+    parser.add_argument('-bc', '--behavior_controller', type=str, help='Behavior Controller', default='GP', choices=['GP', 'LQR'])
+    parser.add_argument('-tc', '--target_controller', type=str, help='Target Controller', default='LQR', choices=['GP', 'LQR'])
+    args = parser.parse_args()
+    if args.contexts == 0:
+        contexts = [10.]
+    elif args.contexts == 1:
+        contexts = [25.]
+    elif args.contexts == 2:
+        contexts = [50.]
+    elif args.contexts == 3:
+        contexts = [65.]
+    else:
+        contexts = [80.]
 
-	start_time = datetime.now()
-	runSimulation(env_name=args.env, visibility=str_to_bool(args.visibility), case=args.case, window_size=2, epochs = 10001, number_mini_batches = 20, activation_unit = 'RELU', learning_rate = 0.001, hidden_units= [90, 30, 10],
-					 number_samples_variance_reduction = 25, precision_alpha = 0.01, weights_prior_mean_1 = 0., weights_prior_mean_2 = 0., weights_prior_deviation_1 = 0.4, weights_prior_deviation_2 = 0.4,
-					 	 mixture_pie = 0.7, rho_mean = -3., extra_likelihood_emphasis = 10000000000000000.)	
-	#GoGoGo(env_name=args.env, exploration_type=args.st, window_size=2, epochs = 20001, number_mini_batches = 20, activation_unit = 'RELU', learning_rate = 0.001,
-	#		 hidden_units= [90, 30, 10], number_samples_variance_reduction = 25, precision_alpha = 0.01, weights_prior_mean_1 = 0., weights_prior_mean_2 = 0., weights_prior_deviation_1 = 0.4,
-	#			 weights_prior_deviation_2 = 0.4, mixture_pie = 0.7, rho_mean = -3., extra_likelihood_emphasis = 10000000000000000., number_episodes_to_test=10, filter_settings=args.s)
-	print('Total time taken is ' + str(datetime.now() - start_time))
+    print(GREEN('Settings are contexts ' + str(contexts) + ', window size is ' + str(args.window_size) + ', partial observability is ' + str(args.partial_observability)))
+	
+	generate_BBB_controller(contexts=contexts, window_size=args.window_size, partial_observability=str_to_bool(args.partial_observability),
+	 behavior_controller=args.behavior_controller, target_controller=args.target_controller, epochs = 10001, number_mini_batches = 20,
+	  activation_unit = 'RELU', learning_rate = 0.001, hidden_units= [90, 30, 10], number_samples_variance_reduction = 25, precision_alpha = 0.01,
+	   weights_prior_mean_1 = 0., weights_prior_mean_2 = 0., weights_prior_deviation_1 = 0.4, weights_prior_deviation_2 = 0.4, mixture_pie = 0.7, rho_mean = -3.,
+	    extra_likelihood_emphasis = 10000000000000000.)	
