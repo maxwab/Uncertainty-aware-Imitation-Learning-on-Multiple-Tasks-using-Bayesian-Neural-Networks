@@ -6,7 +6,7 @@ from Settings import *
 from Utils import *
 
 
-def validate_copycat_controller(env_name, visibility, case):
+def validate_BBB_controller(env_name, visibility, case):
 	copycat_graph = tf.Graph()
 	with copycat_graph.as_default():
 		copycat_controller = Load_Copycat(env_name=env_name, visibility=visibility, case=case)
@@ -170,10 +170,22 @@ def validate_copycat_controller(env_name, visibility, case):
 
 
 if __name__ == '__main__':
-	parser = argparse.ArgumentParser(description=('Reload and validate the quality of the trained copycat controller'))
-	parser.add_argument('-e', '--env_name', type=str, help='Environment Name', default='SlidingBlock')
-	parser.add_argument('-v', '--visibility', type=str, help='Context Visibility', default='False')
-	parser.add_argument('-c', '--case', type=int, help='Case', default=2)
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-c', '--contexts', type=int, help='Contexts to train on', default=0)
+    parser.add_argument('-ws', '--window_size', type=int, help='Number of time-steps in a moving window', default=1)
+    parser.add_argument('-po', '--partial_observability', type=str, help='Partial Observability', default='True')
+    parser.add_argument('-bc', '--behavior_controller', type=str, help='Behavior Controller', default='BBB', choices=['BBB', 'LQR'])
+    parser.add_argument('-tc', '--target_controller', type=str, help='Target Controller', default='LQR', choices=['BBB', 'LQR'])
+    args = parser.parse_args()
+    if args.contexts == 0:
+        contexts = [10.]
+    elif args.contexts == 1:
+        contexts = [25.]
+    elif args.contexts == 2:
+        contexts = [50.]
+    elif args.contexts == 3:
+        contexts = [65.]
+    else:
+        contexts = [80.]
 
-	args = parser.parse_args()
-	validate_copycat_controller(**vars(args))
+    print(GREEN('Settings are contexts ' + str(contexts) + ', window size is ' + str(args.window_size) + ', partial observability is ' + str(args.partial_observability)))

@@ -79,8 +79,8 @@ def validate_GP_controller(contexts, window_size, partial_observability, drift_p
 
                 if not window_size == 1:
                     moving_window_x[0, :-drift_per_time_step] = moving_window_x[0, drift_per_time_step:]
-                    moving_window_x[0, -drift_per_time_step:-(drift_per_time_step-mean_control.shape[1])] = mean_control[0]
-                    moving_window_x[0, -(drift_per_time_step-mean_control.shape[0])] = -cost      
+                    moving_window_x[0, -drift_per_time_step:-(drift_per_time_step-behavior_mean_control.shape[1])] = behavior_mean_control[0]
+                    moving_window_x[0, -(drift_per_time_step-behavior_mean_control.shape[0])] = -cost      
                 if not partial_observability:
                     observation = np.append(observation.T, np.array([[block_mass]]), axis=1)
                 else:

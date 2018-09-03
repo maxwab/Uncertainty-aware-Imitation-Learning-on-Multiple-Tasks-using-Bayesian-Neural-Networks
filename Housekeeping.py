@@ -15,16 +15,16 @@ RED = lambda x: '\x1b[31m{}\x1b[0m'.format(x)
 
 INPUT_MANIPULATION_DIRECTORY = 'input_manipulation_directory/'
 TENSORBOARD_DIRECTORY = 'tensorboard_directory/'
-SAVED_MODELS_DURING_ITERATIONS_DIRECTORY_COPYCAT = 'saved_models_during_iterations_copycat/'
-SAVED_FINAL_MODEL_DIRECTORY_COPYCAT = 'saved_final_model_copycat/'
+SAVED_MODELS_DURING_ITERATIONS_DIRECTORY_BBB = 'saved_models_during_iterations_bbb/'
+SAVED_FINAL_MODEL_DIRECTORY_BBB = 'saved_final_model_bbb/'
 LOGS_DIRECTORY = 'logs/'
 
 MEAN_KEY_X = 'mean_key_x'
 DEVIATION_KEY_X = 'deviation_key_x'
 MEAN_KEY_Y = 'mean_key_y'
 DEVIATION_KEY_Y = 'deviation_key_y'
-OBSERVATION_DIMENSIONS_PER_TIME_STEP_KEY = 'observation_dimensions_per_time_step_key'
-OBSERVATION_WINDOW_SIZE_KEY = 'observation_window_size_key'
+DRIFT_PER_TIME_STEP_KEY = 'drift_per_time_step_key'
+MOVING_WINDOWS_X_SIZE_KEY = 'moving_windows_x_size_key'
 
 ##############################################################
 
