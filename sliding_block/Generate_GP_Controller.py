@@ -15,9 +15,9 @@ sys.path.insert(0,'./../Task_Agnostic_Online_Multitask_Imitation_Learning/')
 
 from Housekeeping import *
 
-def generate_GP_controller(contexts, window_size, partial_observability, behavior_controller, target_controller):
+def generate_GP_controller(context_code, window_size, partial_observability):
     start_time = datetime.now()
-    moving_windows_x, moving_windows_y, drift_per_time_step, moving_windows_x_size = getDemonstrationDataset(all_block_masses=contexts,
+    moving_windows_x, moving_windows_y, drift_per_time_step, moving_windows_x_size = getDemonstrationDataset(all_block_masses=get_sliding_block_context_from_code(context_code=context_code),
                                                          window_size=window_size,
                                                          partial_observability=partial_observability)
     print(RED('Time taken to generate dataset is ' + str(datetime.now()-start_time)))
@@ -50,33 +50,18 @@ def generate_GP_controller(contexts, window_size, partial_observability, behavio
 
     #print(m.kern.lengthscales.read_value())
 
-    if behavior_controller == 'GP': behavior_controller = m
-    if target_controller == 'GP': target_controller = m
-
     start_time = datetime.now()
-    validate_GP_controller(contexts=contexts, window_size=window_size, partial_observability=partial_observability, drift_per_time_step=drift_per_time_step, moving_windows_x_size=moving_windows_x_size, behavior_controller=behavior_controller, target_controller=target_controller)
+    validate_GP_controller(context_code=context_code, window_size=window_size, partial_observability=partial_observability, drift_per_time_step=drift_per_time_step, moving_windows_x_size=moving_windows_x_size, behavior_controller=m)
     print(RED('Time taken for the validation step is ' + str(datetime.now()-start_time)))
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--contexts', type=int, help='Contexts to train on', default=0)
+    parser.add_argument('-c', '--context_code', type=int, help='Contexts to train on', default=0)
     parser.add_argument('-ws', '--window_size', type=int, help='Number of time-steps in a moving window', default=1)
     parser.add_argument('-po', '--partial_observability', type=str, help='Partial Observability', default='True')
-    parser.add_argument('-bc', '--behavior_controller', type=str, help='Behavior Controller', default='GP', choices=['GP', 'LQR'])
-    parser.add_argument('-tc', '--target_controller', type=str, help='Target Controller', default='LQR', choices=['GP', 'LQR'])
     args = parser.parse_args()
-    if args.contexts == 0:
-        contexts = [10.]
-    elif args.contexts == 1:
-        contexts = [25.]
-    elif args.contexts == 2:
-        contexts = [50.]
-    elif args.contexts == 3:
-        contexts = [65.]
-    else:
-        contexts = [80.]
 
-    print(GREEN('Settings are contexts ' + str(contexts) + ', window size is ' + str(args.window_size) + ', partial observability is ' + str(args.partial_observability)))
+    print(GREEN('Settings are context code ' + str(args.context_code) + ', window size is ' + str(args.window_size) + ', partial observability is ' + str(args.partial_observability)))
 
-    generate_GP_controller(contexts=contexts, window_size=args.window_size, partial_observability=str_to_bool(args.partial_observability), behavior_controller=args.behavior_controller, target_controller=args.target_controller)
+    generate_GP_controller(context_code=args.context_code, window_size=args.window_size, partial_observability=str_to_bool(args.partial_observability))
