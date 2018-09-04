@@ -5,6 +5,11 @@ MAXIMUM_NUMBER_OF_STEPS  = 20
 BLOCK_MASSES_TO_TRAIN_ON_1 = np.array([2., 3., 4.])
 BLOCK_MASSES_TO_TRAIN_ON_2 = np.array([52., 53., 54.])
 BLOCK_MASSES_TO_TRAIN_ON_3 = np.array([92., 93., 94.])
+
+
+##############################################################
+
+
 ALL_BLOCK_MASSES_TO_VALIDATE = np.linspace(1., 100., 100)
 INITIALIZATION_STATES_TO_VALIDATE = np.array([[-5., -5.], [5., -5.], [2.5, -2.5], [-2.5, 2.5], [-5., 5.], [5., 5.]])
 
@@ -15,8 +20,8 @@ RED = lambda x: '\x1b[31m{}\x1b[0m'.format(x)
 
 INPUT_MANIPULATION_DIRECTORY = 'input_manipulation_directory/'
 TENSORBOARD_DIRECTORY = 'tensorboard_directory/'
-SAVED_MODELS_DURING_ITERATIONS_DIRECTORY_BBB = 'saved_models_during_iterations_bbb/'
-SAVED_FINAL_MODEL_DIRECTORY_BBB = 'saved_final_model_bbb/'
+SAVED_MODELS_DURING_ITERATIONS_DIRECTORY = 'saved_models_during_iterations/'
+SAVED_FINAL_MODEL_DIRECTORY = 'saved_final_model/'
 LOGS_DIRECTORY = 'logs/'
 
 MEAN_KEY_X = 'mean_key_x'
@@ -26,12 +31,12 @@ DEVIATION_KEY_Y = 'deviation_key_y'
 DRIFT_PER_TIME_STEP_KEY = 'drift_per_time_step_key'
 MOVING_WINDOWS_X_SIZE_KEY = 'moving_windows_x_size_key'
 
-##############################################################
 
 EXPERIMENT_ID_KEY = 'experiment_id_key'
 BEHAVIORAL_CONTROLLER_KEY = 'behavioral_controller_key'
 TARGET_CONTROLLER_KEY = 'target_controller_key'
 CONTEXTS_KEY = 'contexts_key'
+CONTEXT_CODE_KEY = 'context_code_key'
 WINDOW_SIZE_KEY = 'window_size_key'
 PARTIAL_OBSERVABILITY_KEY = 'partial_observability_key'
 
@@ -40,6 +45,8 @@ OBSERVATIONS_LOG_KEY = 'observations_log_key'
 BEHAVIORAL_CONTROL_COSTS_LOG_KEY = 'behavioral_control_costs_log_key'
 BEHAVIORAL_CONTROL_DEVIATIONS_LOG_KEY = 'behavioral_control_deviations_log_key'
 BEHAVIORAL_CONTROL_MEANS_LOG_KEY = 'behavioral_control_means_log_key'
+BEHAVIORAL_CONTROL_MAXIMUMS_LOG_KEY = 'behavioral_control_maximums_log_key'
+BEHAVIORAL_CONTROL_MINIMUMS_LOG_KEY = 'behavioral_control_minimums_log_key'
 
 TARGET_CONTROL_COSTS_LOG_KEY = 'target_control_costs_log_key'
 TARGET_CONTROL_DEVIATIONS_LOG_KEY = 'target_control_deviations_log_key'
@@ -57,6 +64,24 @@ VELOCITY_GAIN_KEY = 'velocity_gain_key'
 
 NORMALIZE = lambda data, mean, deviation: np.divide(np.subtract(data, mean), deviation)
 REVERSE_NORMALIZE = lambda data, mean, deviation: np.add((data * deviation), mean)
+
+
+def get_sliding_block_context_from_code(context_code):
+  if context_code == 0:
+    contexts = [10.]
+  elif context_code == 1:
+    contexts = [25.]
+  elif context_code == 2:
+    contexts = [50.]
+  elif context_code == 3:
+    contexts = [65.]
+  else:
+    contexts = [80.]
+  return contexts
+
+
+def get_code_from_sliding_block_context(context):
+  pass
 
 
 def str_to_bool(s):

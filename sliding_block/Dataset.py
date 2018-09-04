@@ -4,9 +4,9 @@ import numpy as np
 from Sliding_Block import *
 from LQR import *
 
-import sys
+#import sys
 #sys.path.insert(0,'./../Task_Agnostic_Online_Multitask_Imitation_Learning/')
-sys.path.insert(0,'./../')
+#sys.path.insert(0,'./../')
 
 from Housekeeping import *
 

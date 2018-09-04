@@ -1,0 +1,4 @@
+model_checkpoint_path: "iteration-2"
+all_model_checkpoint_paths: "iteration-0"
+all_model_checkpoint_paths: "iteration-1"
+all_model_checkpoint_paths: "iteration-2"

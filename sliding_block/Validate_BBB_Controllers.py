@@ -1,191 +1,108 @@
 import tensorflow as tf, argparse, _pickle as pickle, os
-from Load_Trained_Controllers import Load_Copycat
 from Sliding_Block import *
 from LQR import *
-from Settings import *
-from Utils import *
+
+import sys
+sys.path.insert(0,'./../')
+from Housekeeping import *
+
+from Load_BBB_Controllers import Load_BBB
 
 
-def validate_BBB_controller(env_name, visibility, case):
-	copycat_graph = tf.Graph()
-	with copycat_graph.as_default():
-		copycat_controller = Load_Copycat(env_name=env_name, visibility=visibility, case=case)
+def validate_BBB_controller(context_code, window_size, partial_observability):
+    copycat_graph = tf.Graph()
+    with copycat_graph.as_default():
+        copycat_controller = Load_BBB(context_code=context_code, window_size=window_size, partial_observability=partial_observability)
 
-	logs_directory = LOGS_DIRECTORY + env_name + '/'
-	if not os.path.exists(logs_directory):
-		os.makedirs(logs_directory)
+    if not os.path.exists(LOGS_DIRECTORY):
+        os.makedirs(LOGS_DIRECTORY)
+    file_to_save_logs = LOGS_DIRECTORY + str(context_code) + '_' + str(window_size) + '_' + str(partial_observability) + '_' + 'BBB' + '.pkl'
 
-	logs_file = logs_directory + str(visibility) + '_' + str(case) + '.pkl'
+    logs_for_all_blocks = {}
+    for block_mass in ALL_BLOCK_MASSES_TO_VALIDATE:
+        logs_for_a_block_and_initial_state = {}
+        for initial_state in INITIALIZATION_STATES_TO_VALIDATE:
+            all_observations = []
+            all_behavior_control_means = []
+            all_behavior_control_deviations = []
+            all_behavior_control_maximums = []
+            all_behavior_control_minimums = []
+            all_behavior_costs = []
+            all_target_control_means = []
+            all_target_control_deviations = []
+            env = Sliding_Block(mass=block_mass, initial_state=initial_state)
+            total_cost = total_variance = 0.
+            observation = env.state
 
-	all_Ks = []
+            from LQR import dlqr
+            K, X, eigVals = dlqr(env.A, env.B, env.Q, env.R)            
 
-	logs_for_all_block_masses = {}
+            target_mean_control, target_var_control = -1. * np.dot(K, observation), np.array([[0.]])
+            
+            if not partial_observability:
+                observation = np.append(observation.T, np.array([[block_mass]]), axis=1)
+            else:
+                observation = observation.T
+            
+            moving_window_x = np.zeros((1, copycat_controller.moving_windows_x_size))
+            moving_window_x[0, -observation.shape[1]:] = observation[0]
+            
+            behavior_mean_control, behavior_var_control, maximum_this_time_step, minimum_this_time_step = copycat_controller.sess.run([copycat_controller.mean_of_predictions, copycat_controller.deviation_of_predictions, copycat_controller.maximum_of_predictions, copycat_controller.minimum_of_predictions], feed_dict={copycat_controller.x_input:NORMALIZE(moving_window_x, copycat_controller.mean_x, copycat_controller.deviation_x)})
+            behavior_mean_control = REVERSE_NORMALIZE(behavior_mean_control, copycat_controller.mean_y, copycat_controller.deviation_y)
+            maximum_this_time_step = REVERSE_NORMALIZE(maximum_this_time_step, copycat_controller.mean_y, copycat_controller.deviation_y)
+            minimum_this_time_step = REVERSE_NORMALIZE(minimum_this_time_step, copycat_controller.mean_y, copycat_controller.deviation_y)
+            behavior_var_control = behavior_var_control * copycat_controller.deviation_y
+            
+            step_limit = 0
+            while (step_limit < MAXIMUM_NUMBER_OF_STEPS):      
+                step_limit += 1
+                all_observations.append(observation)
 
-	for block_mass in ALL_BLOCK_MASSES_TO_VALIDATE:
-		#cost_at_this_mass = 0
-		#uncertainty_at_this_mass = 0
-		#total_steps_at_this_mass = 0
+                all_behavior_control_means.append(behavior_mean_control)
+                all_behavior_control_deviations.append(np.sqrt(behavior_var_control))
+                all_behavior_control_maximums.append(maximum_this_time_step)
+                all_behavior_control_minimums.append(minimum_this_time_step)
 
-		flag_for_K_vs_Block_Mass = 0
+                all_target_control_means.append(target_mean_control)
+                all_target_control_deviations.append(target_var_control)
 
-		logs_for_all_initial_states = {}
+                observation, cost, finish = env.step(behavior_mean_control)
+                all_behavior_costs.append(cost)
 
-		for initial_state in INITIALIZATION_STATES:
-			logs_related_to_the_current_initial_state = {}
-			cost_incurred_during_all_time_steps = []
-			action_taken_at_all_time_steps = []
-			deviation_over_dynamics_at_all_time_steps = []
-			minimum_of_actions_at_all_time_steps = []
-			maximum_of_actions_at_all_time_steps = []
-			
-			env = Sliding_Block(mass=block_mass, initial_state=initial_state)
+                target_mean_control, target_var_control = -1. * np.dot(K, observation), np.array([[0.]])
 
-			K, X, eigVals = dlqr(env.A, env.B, env.Q, env.R)
+                if not window_size == 1:
+                    moving_window_x[0, :-copycat_controller.drift_per_time_step] = moving_window_x[0, copycat_controller.drift_per_time_step:]
+                    moving_window_x[0, -copycat_controller.drift_per_time_step:-(copycat_controller.drift_per_time_step-behavior_mean_control.shape[1])] = behavior_mean_control[0]
+                    moving_window_x[0, -(copycat_controller.drift_per_time_step-behavior_mean_control.shape[0])] = -cost      
+                if not partial_observability:
+                    observation = np.append(observation.T, np.array([[block_mass]]), axis=1)
+                else:
+                    observation = observation.T
+                moving_window_x[0, -observation.shape[1]:] = observation[0]
+                
+                behavior_mean_control, behavior_var_control, maximum_this_time_step, minimum_this_time_step = copycat_controller.sess.run([copycat_controller.mean_of_predictions, copycat_controller.deviation_of_predictions, copycat_controller.maximum_of_predictions, copycat_controller.minimum_of_predictions], feed_dict={copycat_controller.x_input:NORMALIZE(moving_window_x, copycat_controller.mean_x, copycat_controller.deviation_x)})
+                behavior_mean_control = REVERSE_NORMALIZE(behavior_mean_control, copycat_controller.mean_y, copycat_controller.deviation_y)
+                maximum_this_time_step = REVERSE_NORMALIZE(maximum_this_time_step, copycat_controller.mean_y, copycat_controller.deviation_y)
+                minimum_this_time_step = REVERSE_NORMALIZE(minimum_this_time_step, copycat_controller.mean_y, copycat_controller.deviation_y)
+                behavior_var_control = behavior_var_control * copycat_controller.deviation_y
 
-			if flag_for_K_vs_Block_Mass == 0:
-				all_Ks.append(K[0])
-				flag_for_K_vs_Block_Mass = 1
-
-			observation = env.state
-			finish = False
-
-			input_validation = np.full((1, (copycat_controller.observation_dimensions_per_time_step*copycat_controller.observation_window_size)-2), 0.)
-
-			if not visibility == True:
-				input_validation[0, -(observation.shape[0]):] = observation.T[0]
-			else:	
-				input_validation[0, -(observation.shape[0]+1):-1] = observation.T[0]
-				input_validation[0, -1] = block_mass
-
-			action_this_time_step = (-1. * np.dot(K, observation))[0,0]
-			#action_this_time_step = np.random.uniform(low=FIRST_ACTION_LOW, high=FIRST_ACTION_HIGH, size=(1,1))
-			#action_this_time_step = np.array([[5.]])
-
-			observation, cost, finish = env.step(action_this_time_step)
-
-			'''
-			if not visibility == True:
-				if not copycat_controller.observation_window_size == 1:
-					input_validation[0, :-4] = input_validation[0, 4:]
-					input_validation[0,-4] = action_this_time_step
-					input_validation[0,-3] = -cost
-				input_validation[0, -(observation.shape[0]):] = observation.T[0]
-			else:
-				if not copycat_controller.observation_window_size == 1:
-					input_validation[0, :-5] = input_validation[0, 5:]
-					input_validation[0,-5] = action_this_time_step
-					input_validation[0,-4] = -cost
-				input_validation[0, -(observation.shape[0]+1):-1] = observation.T[0]
-				input_validation[0, -1] = block_mass
-
-
-			action_this_time_step, deviation_this_time_step, maximum_this_time_step, minimum_this_time_step = copycat_controller.sess.run([copycat_controller.mean_of_predictions, copycat_controller.deviation_of_predictions, copycat_controller.maximum_of_predictions, copycat_controller.minimum_of_predictions], feed_dict={copycat_controller.x_input:NORMALIZE(input_validation, copycat_controller.mean_x, copycat_controller.deviation_x)})
-			action_this_time_step = REVERSE_NORMALIZE(action_this_time_step, copycat_controller.mean_y, copycat_controller.deviation_y)
-			maximum_this_time_step = REVERSE_NORMALIZE(maximum_this_time_step, copycat_controller.mean_y, copycat_controller.deviation_y)
-			minimum_this_time_step = REVERSE_NORMALIZE(minimum_this_time_step, copycat_controller.mean_y, copycat_controller.deviation_y)
-
-			deviation_this_time_step = deviation_this_time_step * copycat_controller.deviation_y
-			'''
-
-			#copycat_action, copycat_uncertainty, copycat_maximum, copycat_minimum = sess.run(BBB_Regressor.makeInference(), feed_dict={BBB_Regressor.X_input: NORMALIZE(input_validation, mean_x, deviation_x)})
-			#copycat_action = REVERSE_NORMALIZE(copycat_action, mean_y, deviation_y)
-			#copycat_uncertainty = REVERSE_NORMALIZE(copycat_uncertainty, mean_y, deviation_y)
-
-			step_limit = 0
-			while (step_limit < MAXIMUM_NUMBER_OF_STEPS):
-
-				'''
-				#Limiting the position domain
-				if observation[0, 0] < -100.:
-					observation[0, 0] = -100.
-				if observation[0, 0] > 100.:
-					observation[0, 0] = 100.
-
-				#Limiting the velocity domain
-				if observation[1, 0] < -30.:
-					observation[1, 0] = -30.
-				if observation[1, 0] > 30.:
-					observation[1, 0] = 30.
-				'''
-
-				if not visibility == True:
-					if not copycat_controller.observation_window_size == 1:
-						input_validation[0, :-4] = input_validation[0, 4:]
-						input_validation[0,-4] = action_this_time_step
-						input_validation[0,-3] = -cost
-					input_validation[0, -(observation.shape[0]):] = observation.T[0]
-				else:
-					if not copycat_controller.observation_window_size == 1:
-						input_validation[0, :-5] = input_validation[0, 5:]
-						input_validation[0,-5] = action_this_time_step
-						input_validation[0,-4] = -cost
-					input_validation[0, -(observation.shape[0]+1):-1] = observation.T[0]
-					input_validation[0, -1] = block_mass
-
-				action_this_time_step, deviation_this_time_step, maximum_this_time_step, minimum_this_time_step = copycat_controller.sess.run([copycat_controller.mean_of_predictions, copycat_controller.deviation_of_predictions, copycat_controller.maximum_of_predictions, copycat_controller.minimum_of_predictions], feed_dict={copycat_controller.x_input:NORMALIZE(input_validation, copycat_controller.mean_x, copycat_controller.deviation_x)})
-				action_this_time_step = REVERSE_NORMALIZE(action_this_time_step, copycat_controller.mean_y, copycat_controller.deviation_y)
-				maximum_this_time_step = REVERSE_NORMALIZE(maximum_this_time_step, copycat_controller.mean_y, copycat_controller.deviation_y)
-				minimum_this_time_step = REVERSE_NORMALIZE(minimum_this_time_step, copycat_controller.mean_y, copycat_controller.deviation_y)
-
-				deviation_this_time_step = deviation_this_time_step * copycat_controller.deviation_y
-
-				#copycat_action, copycat_uncertainty, copycat_maximum, copycat_minimum = sess.run(BBB_Regressor.makeInference(), feed_dict={BBB_Regressor.X_input:NORMALIZE(input_validation, mean_x, deviation_x)})
-				#copycat_action = REVERSE_NORMALIZE(copycat_action, mean_y, deviation_y)
-				#copycat_uncertainty = REVERSE_NORMALIZE(copycat_uncertainty, mean_y, deviation_y)
-
-				#cost_at_this_state += cost[0,0]
-				#uncertainty_at_this_state += deviation_this_time_step[0,0]
-
-				step_limit += 1					
-				observation, cost, finish = env.step(action_this_time_step)
-
-				cost_incurred_during_all_time_steps.append(-cost[0, 0])
-				action_taken_at_all_time_steps.append(action_this_time_step[0, 0])
-				deviation_over_dynamics_at_all_time_steps.append(deviation_this_time_step[0, 0])
-				minimum_of_actions_at_all_time_steps.append(minimum_this_time_step[0, 0])
-				maximum_of_actions_at_all_time_steps.append(maximum_this_time_step[0, 0])
-
-			logs_related_to_the_current_initial_state[COST_LOG_KEY] = cost_incurred_during_all_time_steps
-			logs_related_to_the_current_initial_state[DEVIATION_LOG_KEY] = deviation_over_dynamics_at_all_time_steps
-			logs_related_to_the_current_initial_state[ACTION_TAKEN_LOG_KEY] = action_taken_at_all_time_steps
-			logs_related_to_the_current_initial_state[MAXIMUM_ACTION_LOG_KEY] = maximum_of_actions_at_all_time_steps
-			logs_related_to_the_current_initial_state[MINIMUM_ACTION_LOG_KEY] = minimum_of_actions_at_all_time_steps
-
-
-			logs_for_all_initial_states[str(initial_state)] = logs_related_to_the_current_initial_state
-			#cost_at_this_mass += (cost_at_this_state/step_limit)
-			#uncertainty_at_this_mass += (uncertainty_at_this_state/step_limit)
-			#total_steps_at_this_mass += step_limit
-
-		logs_for_all_initial_states[POSITION_GAIN_KEY] = K[0, 0]
-		logs_for_all_initial_states[VELOCITY_GAIN_KEY] = K[0, 1]
-		logs_for_all_block_masses[str(block_mass)] = logs_for_all_initial_states
-		#cost_over_all_block_masses.append(cost_at_this_mass/INITIALIZATION_STATES.shape[0])
-		#uncertainties_over_all_block_masses.append(uncertainty_at_this_mass/INITIALIZATION_STATES.shape[0])
-		#total_steps_taken_over_all_block_masses.append(total_steps_at_this_mass)
-
-	with open(logs_file, 'wb') as f:
-		pickle.dump(logs_for_all_block_masses, f)
-
+            logs_for_a_block_and_initial_state[str(initial_state)] = {OBSERVATIONS_LOG_KEY: np.concatenate(all_observations), BEHAVIORAL_CONTROL_MEANS_LOG_KEY: np.concatenate(all_behavior_control_means),
+                                                                     BEHAVIORAL_CONTROL_COSTS_LOG_KEY: np.concatenate(all_behavior_costs), BEHAVIORAL_CONTROL_DEVIATIONS_LOG_KEY: np.concatenate(all_behavior_control_deviations),
+                                                                     BEHAVIORAL_CONTROL_MAXIMUMS_LOG_KEY: np.concatenate(all_behavior_control_maximums), BEHAVIORAL_CONTROL_MINIMUMS_LOG_KEY: np.concatenate(all_behavior_control_minimums), 
+                                                                     TARGET_CONTROL_MEANS_LOG_KEY: np.concatenate(all_target_control_means), TARGET_CONTROL_DEVIATIONS_LOG_KEY: np.concatenate(all_target_control_deviations)}
+        logs_for_all_blocks[str(block_mass)] = logs_for_a_block_and_initial_state
+    with open(file_to_save_logs, 'wb') as f:
+        pickle.dump(logs_for_all_blocks, f, protocol=-1)
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--contexts', type=int, help='Contexts to train on', default=0)
+    parser.add_argument('-c', '--context_code', type=int, help='Context code to train on', default=0)
     parser.add_argument('-ws', '--window_size', type=int, help='Number of time-steps in a moving window', default=1)
     parser.add_argument('-po', '--partial_observability', type=str, help='Partial Observability', default='True')
-    parser.add_argument('-bc', '--behavior_controller', type=str, help='Behavior Controller', default='BBB', choices=['BBB', 'LQR'])
-    parser.add_argument('-tc', '--target_controller', type=str, help='Target Controller', default='LQR', choices=['BBB', 'LQR'])
     args = parser.parse_args()
-    if args.contexts == 0:
-        contexts = [10.]
-    elif args.contexts == 1:
-        contexts = [25.]
-    elif args.contexts == 2:
-        contexts = [50.]
-    elif args.contexts == 3:
-        contexts = [65.]
-    else:
-        contexts = [80.]
 
-    print(GREEN('Settings are contexts ' + str(contexts) + ', window size is ' + str(args.window_size) + ', partial observability is ' + str(args.partial_observability)))
+    print(GREEN('Settings are context code ' + str(args.context_code) + ', window size is ' + str(args.window_size) + ', partial observability is ' + str(args.partial_observability)))
+
+    validate_BBB_controller(context_code=args.context_code, window_size=args.window_size, partial_observability=str_to_bool(args.partial_observability))

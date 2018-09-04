@@ -1,33 +1,24 @@
 from datetime import datetime
 import tensorflow as tf, argparse, sys, os, copy, _pickle as pickle
 
-from Dataset import getDemonstrationDataset
 from Sliding_Block import *
 #from Validate_BBB_Controllers import validate_BBB_controller
 
 import sys
-sys.path.insert(0,'./../Task_Agnostic_Online_Multitask_Imitation_Learning/')
+sys.path.insert(0,'./../')
 from Housekeeping import *
 from BBBNNRegression import BBBNNRegression
+from Dataset import getDemonstrationDataset
 
 
-def generate_BBB_controller(contexts, window_size, partial_observability, behavior_controller, target_controller, epochs, number_mini_batches, activation_unit, learning_rate, hidden_units, number_samples_variance_reduction, precision_alpha, weights_prior_mean_1,
+def generate_BBB_controller(context_code, window_size, partial_observability, epochs, number_mini_batches, activation_unit, learning_rate, hidden_units, number_samples_variance_reduction, precision_alpha, weights_prior_mean_1,
                      weights_prior_mean_2, weights_prior_deviation_1, weights_prior_deviation_2, mixture_pie, rho_mean, extra_likelihood_emphasis):
 
-    if target_controller == 'LQR': target_identity = 'LQR'
-    elif not target_controller == 'LQR': target_identity = 'GP'
-    else: target_identity = 'None'
-    if behavior_controller == 'LQR': behavior_identity = 'LQR'
-    elif not behavior_controller == 'LQR': behavior_identity = 'GP'
-    else: behavior_identity = 'None'
-    if target_controller:
-        configuration_identity = str(contexts) + '_' + str(window_size) + '_' + str(partial_observability) + '_' + behavior_identity + '_' + target_identity
-    else:
-        configuration_identity = str(contexts) + '_' + str(window_size) + '_' + str(partial_observability) + '_' + behavior_identity
+    configuration_identity = str(context_code) + '_' + str(window_size) + '_' + str(partial_observability) + '_' + 'BBB'
 
     directory_to_save_tensorboard_data = TENSORBOARD_DIRECTORY + configuration_identity + '/'
-    saved_models_during_iterations_bbb = SAVED_MODELS_DURING_ITERATIONS_DIRECTORY_BBB + configuration_identity + '/'
-    saved_final_model_bbb = SAVED_FINAL_MODEL_DIRECTORY_BBB + configuration_identity + '/'
+    saved_models_during_iterations_bbb = SAVED_MODELS_DURING_ITERATIONS_DIRECTORY + configuration_identity + '/'
+    saved_final_model_bbb = SAVED_FINAL_MODEL_DIRECTORY + configuration_identity + '/'
     if not os.path.exists(INPUT_MANIPULATION_DIRECTORY):
         os.makedirs(INPUT_MANIPULATION_DIRECTORY)   
     if not os.path.exists(directory_to_save_tensorboard_data):
@@ -38,7 +29,7 @@ def generate_BBB_controller(contexts, window_size, partial_observability, behavi
         os.makedirs(saved_final_model_bbb)
 
     start_time = datetime.now()
-    moving_windows_x, moving_windows_y, drift_per_time_step, moving_windows_x_size = getDemonstrationDataset(all_block_masses=contexts, window_size=window_size,
+    moving_windows_x, moving_windows_y, drift_per_time_step, moving_windows_x_size = getDemonstrationDataset(all_block_masses= get_sliding_block_context_from_code(context_code=context_code), window_size=window_size,
                                                          partial_observability=partial_observability)
     print(RED('Time taken to generate dataset is ' + str(datetime.now()-start_time)))
 
@@ -85,7 +76,7 @@ def generate_BBB_controller(contexts, window_size, partial_observability, behavi
                     previous_minimum_loss = loss
                 ptr += mini_batch_size
                 writer.add_summary(summary, global_step=tf.train.global_step(sess, BBB_Regressor.global_step))
-            if epoch_iterator % 4000 == 0:
+            if epoch_iterator % 10 == 0:
                 print(RED('Training progress: ' + str(epoch_iterator) + '/' + str(epochs)))     
         writer.close()
         saver.save(sess, saved_final_model_bbb + 'final', write_state=False)
@@ -93,25 +84,15 @@ def generate_BBB_controller(contexts, window_size, partial_observability, behavi
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('-c', '--contexts', type=int, help='Contexts to train on', default=0)
+    parser.add_argument('-c', '--context_code', type=int, help='Contexts to train on', default=0)
     parser.add_argument('-ws', '--window_size', type=int, help='Number of time-steps in a moving window', default=1)
     parser.add_argument('-po', '--partial_observability', type=str, help='Partial Observability', default='True')
     args = parser.parse_args()
-    if args.contexts == 0:
-        contexts = [10.]
-    elif args.contexts == 1:
-        contexts = [25.]
-    elif args.contexts == 2:
-        contexts = [50.]
-    elif args.contexts == 3:
-        contexts = [65.]
-    else:
-        contexts = [80.]
 
-    print(GREEN('Settings are contexts ' + str(contexts) + ', window size is ' + str(args.window_size) + ', partial observability is ' + str(args.partial_observability)))
+    print(GREEN('Settings are context code ' + str(args.context_code) + ', window size is ' + str(args.window_size) + ', partial observability is ' + str(args.partial_observability)))
     
-    generate_BBB_controller(contexts=contexts, window_size=args.window_size, partial_observability=str_to_bool(args.partial_observability),
-     behavior_controller='BBB', target_controller='LQR', epochs = 10001, number_mini_batches = 20,
+    generate_BBB_controller(context_code=args.context_code, window_size=args.window_size, partial_observability=str_to_bool(args.partial_observability),
+     epochs = 10001, number_mini_batches = 20,
       activation_unit = 'RELU', learning_rate = 0.001, hidden_units= [90, 30, 10], number_samples_variance_reduction = 25, precision_alpha = 0.01,
        weights_prior_mean_1 = 0., weights_prior_mean_2 = 0., weights_prior_deviation_1 = 0.4, weights_prior_deviation_2 = 0.4, mixture_pie = 0.7, rho_mean = -3.,
         extra_likelihood_emphasis = 10000000000000000.) 
