@@ -16,7 +16,7 @@ def visualize_learner(all_task_configurations):
     ax_3 = fig.add_subplot(223, frameon=False)
     for iterator, configuration in enumerate(all_task_configurations):
         file_to_load_data_from = './' + configuration[EXPERIMENT_ID_KEY] + '/' + LOGS_DIRECTORY + configuration[CONTEXT_CODE_KEY] + '_' + configuration[WINDOW_SIZE_KEY] + '_' + configuration[PARTIAL_OBSERVABILITY_KEY] + '_' + configuration[BEHAVIORAL_CONTROLLER_KEY] + '.pkl'
-        configuration_label = configuration[CONTEXT_CODE_KEY] + '_' + configuration[WINDOW_SIZE_KEY] + '_' + configuration[PARTIAL_OBSERVABILITY_KEY] + '_' + configuration[BEHAVIORAL_CONTROLLER_KEY]
+        configuration_label = 'Block Mass:' + str(get_sliding_block_context_from_code(int(configuration[CONTEXT_CODE_KEY]))) + ', window size:' + configuration[WINDOW_SIZE_KEY] + ', partial obs.:' + configuration[PARTIAL_OBSERVABILITY_KEY] + ', controller:' + configuration[BEHAVIORAL_CONTROLLER_KEY]
         with open(file_to_load_data_from, 'rb') as f:
             loaded_data = pickle.load(f)
         all_tasks = list(loaded_data.keys())
@@ -45,27 +45,33 @@ def visualize_learner(all_task_configurations):
             behavioral_average_task_deviations.append(np.mean(np.sum(behavioral_task_deviations, axis=1)))
             behavioral_average_task_costs.append(np.mean(np.sum(behavioral_task_costs, axis=1)))
             average_predictive_error.append(np.mean(predictive_error))
-        ax_1.plot(all_tasks, behavioral_average_task_deviations, label='Behavior_'+configuration_label, color=matplotlibcolors[iterator])
-        ax_2.plot(all_tasks, behavioral_average_task_costs, label='Behavior_'+configuration_label, color=matplotlibcolors[iterator])
-        ax_3.plot(all_tasks, average_predictive_error, label='Predictive Error', color=matplotlibcolors[iterator])
+        ax_1.plot(all_tasks, behavioral_average_task_deviations, label=configuration_label, color=matplotlibcolors[iterator])
+        ax_2.plot(all_tasks, behavioral_average_task_costs, label=configuration_label, color=matplotlibcolors[iterator])
+        ax_3.plot(all_tasks, average_predictive_error, label=configuration_label, color=matplotlibcolors[iterator])
     ax_1.set_xlabel('Tasks')
     ax_1.set_xticks(np.linspace(1., 100., 10))
     ax_1.set_ylabel('Standard Deviation')
     #ax_1.set_yticks(np.arange(0., 3.0, 0.2))
+    #ax_1.set_ylim(0., 5000.)
+    ax_1.set_yscale('log')
     ax_1.set_title('Uncertainty on tasks')
     ax_1.legend()
     ax_2.set_xlabel('Tasks')
     ax_2.set_xticks(np.linspace(1., 100., 10))
     ax_2.set_ylabel('Episodic Cost')
     #ax_2.set_yticks(np.arange(0., 3.0, 0.2))
+    #ax_2.set_ylim(0., 500000.)
+    ax_2.set_yscale('log')
     ax_2.set_title('Episodic costs on tasks')
     ax_2.legend()
     
     ax_3.set_xlabel('Tasks')
     ax_3.set_xticks(np.linspace(1., 100., 10))
-    ax_3.set_ylabel('Predictive Error')
+    ax_3.set_ylabel('Predictive Mean Squared Error')
     #ax_3.set_yticks(np.arange(0., 3.0, 0.2))
-    ax_3.set_title('Predictive Errors on tasks')
+    #ax_3.set_ylim(0., 100000.)
+    ax_3.set_yscale('log')
+    ax_3.set_title('Predictive Errors')
     ax_3.legend()
     
     plt.show()    

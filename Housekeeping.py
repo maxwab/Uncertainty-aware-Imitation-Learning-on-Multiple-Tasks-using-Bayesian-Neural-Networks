@@ -66,6 +66,20 @@ NORMALIZE = lambda data, mean, deviation: np.divide(np.subtract(data, mean), dev
 REVERSE_NORMALIZE = lambda data, mean, deviation: np.add((data * deviation), mean)
 
 
+def get_mean_and_deviation(data):
+  mean_data = np.mean(data, axis = 0)
+  deviation_data = np.std(data, axis = 0)
+  for feature_index in range(deviation_data.shape[0]):
+    if deviation_data[feature_index] == 0.:
+      if mean_data[feature_index] == 0.:
+        # This means all the values are 0.
+        deviation_data[feature_index] = 1.
+      else:
+        # This means all the values are equal but not equal to 0.
+        deviation_data[feature_index] = mean_data[feature_index]
+  return mean_data, deviation_data
+
+
 def get_sliding_block_context_from_code(context_code):
   if context_code == 0:
     contexts = [10.]

@@ -34,12 +34,10 @@ def generate_BBB_controller(context_code, window_size, partial_observability, ep
     print(RED('Time taken to generate dataset is ' + str(datetime.now()-start_time)))
 
     # House-keeping to make data amenable for good training
-    mean_x = np.mean(moving_windows_x, axis = 0)
-    deviation_x = np.std(moving_windows_x, axis = 0)
+    mean_x, deviation_x = get_mean_and_deviation(data = moving_windows_x)
     moving_windows_x = NORMALIZE(moving_windows_x, mean_x, deviation_x)
 
-    mean_y = np.mean(moving_windows_y, axis = 0)
-    deviation_y = np.std(moving_windows_y, axis = 0)
+    mean_y, deviation_y = get_mean_and_deviation(data = moving_windows_y)
     moving_windows_y = NORMALIZE(moving_windows_y, mean_y, deviation_y)
 
     file_name_to_save_input_manipulation_data = INPUT_MANIPULATION_DIRECTORY + configuration_identity + '.pkl'
