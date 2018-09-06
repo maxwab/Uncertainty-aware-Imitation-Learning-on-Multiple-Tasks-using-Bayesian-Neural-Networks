@@ -89,8 +89,16 @@ def get_sliding_block_context_from_code(context_code):
     contexts = [50.]
   elif context_code == 3:
     contexts = [65.]
-  else:
+  elif context_code == 4:
     contexts = [80.]
+  elif context_code == 5:
+    contexts = [80., 85.]
+  elif context_code == 6:
+    contexts = [5., 10.]
+  elif context_code == 7:
+    contexts = [40., 60.]
+  else: 
+    contexts = [10., 90.]
   return contexts
 
 
