@@ -78,6 +78,7 @@ def getDemonstrationDataset(all_block_masses, window_size, partial_observability
             moving_windows_x = copy.deepcopy(moving_windows_x_block)
             moving_windows_y = copy.deepcopy(moving_windows_y_block)
         else:
-            moving_windows_x = np.append(moving_windows_x, moving_windows_x_block)
-            moving_windows_y = np.append(moving_windows_y, moving_windows_y_block)
+            moving_windows_x = np.append(moving_windows_x, moving_windows_x_block, axis=0)
+            moving_windows_y = np.append(moving_windows_y, moving_windows_y_block, axis=0)
+
     return moving_windows_x, moving_windows_y, drift_per_time_step, moving_windows_x_size
