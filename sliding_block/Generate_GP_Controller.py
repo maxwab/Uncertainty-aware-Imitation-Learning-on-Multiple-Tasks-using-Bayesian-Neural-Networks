@@ -31,7 +31,7 @@ def generate_GP_controller(context_code, window_size, partial_observability):
     print(BLUE('Likelihood variance is 1/%-10/% /of ' + str(kernel_variance)))
     '''
 
-    k = gpflow.kernels.RBF(1, lengthscales=0.3)
+    k = gpflow.kernels.RBF(moving_windows_x.shape[1], lengthscales=0.1*np.std(moving_windows_x, axis=0))
     #k = gpflow.kernels.Matern52(1, lengthscales=0.3)
     #meanf = gpflow.mean_functions.Linear(1.0, 0.0)
     #m = gpflow.models.GPR(moving_windows_x, moving_windows_y, k, meanf)

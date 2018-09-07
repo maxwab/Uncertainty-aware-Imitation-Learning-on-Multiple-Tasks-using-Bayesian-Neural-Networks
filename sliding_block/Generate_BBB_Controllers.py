@@ -74,7 +74,7 @@ def generate_BBB_controller(context_code, window_size, partial_observability, ep
                     previous_minimum_loss = loss
                 ptr += mini_batch_size
                 writer.add_summary(summary, global_step=tf.train.global_step(sess, BBB_Regressor.global_step))
-            if epoch_iterator % 10 == 0:
+            if epoch_iterator % 1000 == 0:
                 print(RED('Training progress: ' + str(epoch_iterator) + '/' + str(epochs)))     
         writer.close()
         saver.save(sess, saved_final_model_bbb + 'final', write_state=False)

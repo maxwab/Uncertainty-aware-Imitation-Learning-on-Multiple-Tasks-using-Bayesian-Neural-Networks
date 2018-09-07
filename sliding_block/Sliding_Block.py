@@ -1,7 +1,7 @@
 import numpy as np
 
 class Sliding_Block():
-	def __init__(self, mass, initial_state):
+	def __init__(self, mass, initial_state=np.array([[0., 0.]])):
 		delta_time = 0.1
 		self.mass = mass
 

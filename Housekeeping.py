@@ -102,6 +102,14 @@ def get_sliding_block_context_from_code(context_code):
   return contexts
 
 
+def get_states_grid(resolution=11):
+    all_states, all_velocities = np.meshgrid(np.linspace(-5, 5, resolution), np.linspace(-5, 5, resolution))
+    all_states = np.reshape(all_states, (-1, 1))
+    all_velocities = np.reshape(all_velocities, (-1, 1))
+    states_grid = np.append(all_states, all_velocities, axis=1)
+    return states_grid
+
+
 def get_code_from_sliding_block_context(context):
   pass
 
