@@ -31,18 +31,45 @@ def generate_GP_controller(context_code, window_size, partial_observability):
     print(BLUE('Likelihood variance is 1/%-10/% /of ' + str(kernel_variance)))
     '''
 
-    k = gpflow.kernels.RBF(moving_windows_x.shape[1], lengthscales=0.1*np.std(moving_windows_x, axis=0))
+    mean_x, deviation_x = get_mean_and_deviation(data = moving_windows_x)
+    moving_windows_x = NORMALIZE(moving_windows_x, mean_x, deviation_x)
+
+    mean_y, deviation_y = get_mean_and_deviation(data = moving_windows_y)
+    moving_windows_y = NORMALIZE(moving_windows_y, mean_y, deviation_y)    
+
+    k = gpflow.kernels.RBF(moving_windows_x.shape[1], lengthscales=0.01*np.std(moving_windows_x, axis=0))
     #k = gpflow.kernels.Matern52(1, lengthscales=0.3)
     #meanf = gpflow.mean_functions.Linear(1.0, 0.0)
     #m = gpflow.models.GPR(moving_windows_x, moving_windows_y, k, meanf)
     m = gpflow.models.GPR(moving_windows_x, moving_windows_y, k)
-    m.likelihood.variance = 0.01
+    m.likelihood.variance = 1e-4
     #print(m.read_trainables())
     #print(m.as_pandas_table())
     
+
+    print(GREEN('Before hyperparameter optimization::'))
+    mean_control, var_control = m.predict_y(moving_windows_x)
+    mean_squared_predictive_error = np.mean(np.square(mean_control - moving_windows_y))
+    average_var_control = np.mean(var_control)
+    print(GREEN('Mean squared predictive error is ' + str(mean_squared_predictive_error)))
+    print(GREEN('Average control variance is ' + str(average_var_control)))
+    print(m.as_pandas_table())
+    print()
+
+
     start_time = datetime.now()
     gpflow.train.ScipyOptimizer().minimize(m)
     print(RED('Time taken to optimize the parameters is ' + str(datetime.now()-start_time)))
+
+
+    print(GREEN('After hyperparameter optimization::'))
+    mean_control, var_control = m.predict_y(moving_windows_x)
+    mean_squared_predictive_error = np.mean(np.square(mean_control - moving_windows_y))
+    average_var_control = np.mean(var_control)
+    print(GREEN('Mean squared predictive error is ' + str(mean_squared_predictive_error)))
+    print(GREEN('Average control variance is ' + str(average_var_control)))
+    print(m.as_pandas_table())
+    print()
 
     #plot(m)
     #print(m.read_trainables())
@@ -51,7 +78,8 @@ def generate_GP_controller(context_code, window_size, partial_observability):
     #print(m.kern.lengthscales.read_value())
 
     start_time = datetime.now()
-    validate_GP_controller(context_code=context_code, window_size=window_size, partial_observability=partial_observability, drift_per_time_step=drift_per_time_step, moving_windows_x_size=moving_windows_x_size, behavior_controller=m)
+    validate_GP_controller(context_code=context_code, window_size=window_size, partial_observability=partial_observability, drift_per_time_step=drift_per_time_step, moving_windows_x_size=moving_windows_x_size, behavior_controller=m,
+     mean_x=mean_x, deviation_x=deviation_x, mean_y=mean_y, deviation_y=deviation_y)
     print(RED('Time taken for the validation step is ' + str(datetime.now()-start_time)))
 
 

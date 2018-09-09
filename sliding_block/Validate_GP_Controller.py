@@ -11,7 +11,7 @@ sys.path.insert(0,'./../Task_Agnostic_Online_Multitask_Imitation_Learning/')
 
 from Housekeeping import *
 
-def validate_GP_controller(context_code, window_size, partial_observability, drift_per_time_step, moving_windows_x_size, behavior_controller):
+def validate_GP_controller(context_code, window_size, partial_observability, drift_per_time_step, moving_windows_x_size, behavior_controller, mean_x, deviation_x, mean_y, deviation_y):
     if not os.path.exists(LOGS_DIRECTORY):
         os.makedirs(LOGS_DIRECTORY)
 
@@ -43,7 +43,9 @@ def validate_GP_controller(context_code, window_size, partial_observability, dri
             moving_window_x = np.zeros((1, moving_windows_x_size))
             moving_window_x[0, -observation.shape[1]:] = observation[0]
             
-            behavior_mean_control, behavior_var_control = behavior_controller.predict_y(moving_window_x)
+            behavior_mean_control, behavior_var_control = behavior_controller.predict_y(NORMALIZE(moving_window_x, mean_x, deviation_x))
+            behavior_mean_control = REVERSE_NORMALIZE(behavior_mean_control, mean_y, deviation_y)
+            behavior_var_control = behavior_var_control * deviation_y
             
             step_limit = 0
             while (step_limit < MAXIMUM_NUMBER_OF_STEPS):      
@@ -71,7 +73,9 @@ def validate_GP_controller(context_code, window_size, partial_observability, dri
                     observation = observation.T
                 moving_window_x[0, -observation.shape[1]:] = observation[0]
                 
-                behavior_mean_control, behavior_var_control = behavior_controller.predict_y(moving_window_x)
+                behavior_mean_control, behavior_var_control = behavior_controller.predict_y(NORMALIZE(moving_window_x, mean_x, deviation_x))
+                behavior_mean_control = REVERSE_NORMALIZE(behavior_mean_control, mean_y, deviation_y)
+                behavior_var_control = behavior_var_control * deviation_y
 
             logs_for_a_block_and_initial_state[str(initial_state)] = {OBSERVATIONS_LOG_KEY: np.concatenate(all_observations), BEHAVIORAL_CONTROL_MEANS_LOG_KEY: np.concatenate(all_behavior_control_means),
                                                                      BEHAVIORAL_CONTROL_COSTS_LOG_KEY: np.concatenate(all_behavior_costs), BEHAVIORAL_CONTROL_DEVIATIONS_LOG_KEY: np.concatenate(all_behavior_control_deviations), 
