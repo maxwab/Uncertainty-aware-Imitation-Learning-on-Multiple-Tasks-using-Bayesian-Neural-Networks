@@ -2,14 +2,6 @@ import numpy as np
 
 MAXIMUM_NUMBER_OF_STEPS  = 20
 
-BLOCK_MASSES_TO_TRAIN_ON_1 = np.array([2., 3., 4.])
-BLOCK_MASSES_TO_TRAIN_ON_2 = np.array([52., 53., 54.])
-BLOCK_MASSES_TO_TRAIN_ON_3 = np.array([92., 93., 94.])
-
-
-##############################################################
-
-
 ALL_BLOCK_MASSES_TO_VALIDATE = np.linspace(1., 100., 100)
 INITIALIZATION_STATES_TO_VALIDATE = np.array([[-5., -5.], [5., -5.], [2.5, -2.5], [-2.5, 2.5], [-5., 5.], [5., 5.]])
 
@@ -31,6 +23,12 @@ DEVIATION_KEY_Y = 'deviation_key_y'
 DRIFT_PER_TIME_STEP_KEY = 'drift_per_time_step_key'
 MOVING_WINDOWS_X_SIZE_KEY = 'moving_windows_x_size_key'
 
+UNOPTIMIZED_GP_FIT_KEY = 'unoptimized_GP_fit_key'
+OPTIMIZED_GP_FIT_KEY = 'optimized_GP_fit_key'
+UNOPTIMIZED_GP_TRAINABLES_KEY = 'unoptimized_GP_trainables_key'
+OPTIMIZED_GP_TRAINABLES_KEY = 'optimized_GP_trainables_key'
+MEAN_GP_FIT_PREDICTIVE_ERROR_KEY = 'mean_GP_fit_predictive_error_key'
+MEAN_GP_FIT_VARIANCE_KEY = 'mean_GP_fit_variance_key'
 
 EXPERIMENT_ID_KEY = 'experiment_id_key'
 BEHAVIORAL_CONTROLLER_KEY = 'behavioral_controller_key'
@@ -41,6 +39,9 @@ WINDOW_SIZE_KEY = 'window_size_key'
 PARTIAL_OBSERVABILITY_KEY = 'partial_observability_key'
 
 OBSERVATIONS_LOG_KEY = 'observations_log_key'
+
+DEMONSTRATOR_CONTROLS_LOG_KEY = 'demonstrator_controls_log_key'
+DEMONSTRATOR_COSTS_LOG_KEY = 'demonstrator_costs_log_key'
 
 BEHAVIORAL_CONTROL_COSTS_LOG_KEY = 'behavioral_control_costs_log_key'
 BEHAVIORAL_CONTROL_DEVIATIONS_LOG_KEY = 'behavioral_control_deviations_log_key'
@@ -53,6 +54,7 @@ TARGET_CONTROL_DEVIATIONS_LOG_KEY = 'target_control_deviations_log_key'
 TARGET_CONTROL_MEANS_LOG_KEY = 'target_control_means_log_key'
 
 matplotlibcolors = ['black', 'red', 'sienna', 'sandybrown', 'gold', 'olivedrab', 'deepskyblue', 'blue', 'red', 'chartreuse', 'darkcyan']
+barwidth = 0.25
 
 ##############################################################
 

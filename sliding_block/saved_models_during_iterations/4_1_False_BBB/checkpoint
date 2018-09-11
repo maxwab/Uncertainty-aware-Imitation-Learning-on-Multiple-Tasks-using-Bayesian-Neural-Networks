@@ -1,4 +1,4 @@
-model_checkpoint_path: "iteration-8132"
-all_model_checkpoint_paths: "iteration-7270"
-all_model_checkpoint_paths: "iteration-8094"
-all_model_checkpoint_paths: "iteration-8132"
+model_checkpoint_path: "iteration-7218"
+all_model_checkpoint_paths: "iteration-6869"
+all_model_checkpoint_paths: "iteration-6901"
+all_model_checkpoint_paths: "iteration-7218"

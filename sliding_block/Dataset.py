@@ -49,7 +49,7 @@ def getDemonstrationsFromBlocknMass(block_mass, window_size, initial_state, part
 
 def getDemonstrationsFromBlock(block_mass, window_size, partial_observability):
     ## Initial-States Grid
-    all_states, all_velocities = np.meshgrid(np.linspace(-5, 5, 11), np.linspace(-5, 5, 11))
+    all_states, all_velocities = np.meshgrid(np.linspace(-5, 5, 6), np.linspace(-5, 5, 6))
     all_states = np.reshape(all_states, (-1, 1))
     all_velocities = np.reshape(all_velocities, (-1, 1))
     all_initial_states = np.append(all_states, all_velocities, axis=1)

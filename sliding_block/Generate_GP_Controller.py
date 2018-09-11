@@ -16,6 +16,12 @@ sys.path.insert(0,'./../Task_Agnostic_Online_Multitask_Imitation_Learning/')
 from Housekeeping import *
 
 def generate_GP_controller(context_code, window_size, partial_observability):
+    if not os.path.exists(LOGS_DIRECTORY):
+        os.makedirs(LOGS_DIRECTORY)
+
+    file_to_save_gp_fit_logs = LOGS_DIRECTORY + str(context_code) + '_' + str(window_size) + '_' + str(partial_observability) + '_' + 'GP_fit.pkl'
+    gp_fit_logs = {}
+
     start_time = datetime.now()
     moving_windows_x, moving_windows_y, drift_per_time_step, moving_windows_x_size = getDemonstrationDataset(all_block_masses=get_sliding_block_context_from_code(context_code=context_code),
                                                          window_size=window_size,
@@ -46,30 +52,24 @@ def generate_GP_controller(context_code, window_size, partial_observability):
     #print(m.read_trainables())
     #print(m.as_pandas_table())
     
-
-    print(GREEN('Before hyperparameter optimization::'))
     mean_control, var_control = m.predict_y(moving_windows_x)
     mean_squared_predictive_error = np.mean(np.square(mean_control - moving_windows_y))
     average_var_control = np.mean(var_control)
-    print(GREEN('Mean squared predictive error is ' + str(mean_squared_predictive_error)))
-    print(GREEN('Average control variance is ' + str(average_var_control)))
-    print(m.as_pandas_table())
-    print()
-
+    gp_fit_logs[UNOPTIMIZED_GP_FIT_KEY] = {MEAN_GP_FIT_PREDICTIVE_ERROR_KEY: mean_squared_predictive_error, MEAN_GP_FIT_VARIANCE_KEY: average_var_control}
+    gp_fit_logs[UNOPTIMIZED_GP_TRAINABLES_KEY] = m.as_pandas_table()
 
     start_time = datetime.now()
     gpflow.train.ScipyOptimizer().minimize(m)
     print(RED('Time taken to optimize the parameters is ' + str(datetime.now()-start_time)))
 
-
-    print(GREEN('After hyperparameter optimization::'))
     mean_control, var_control = m.predict_y(moving_windows_x)
     mean_squared_predictive_error = np.mean(np.square(mean_control - moving_windows_y))
     average_var_control = np.mean(var_control)
-    print(GREEN('Mean squared predictive error is ' + str(mean_squared_predictive_error)))
-    print(GREEN('Average control variance is ' + str(average_var_control)))
-    print(m.as_pandas_table())
-    print()
+    gp_fit_logs[OPTIMIZED_GP_FIT_KEY] = {MEAN_GP_FIT_PREDICTIVE_ERROR_KEY: mean_squared_predictive_error, MEAN_GP_FIT_VARIANCE_KEY: average_var_control}
+    gp_fit_logs[OPTIMIZED_GP_TRAINABLES_KEY] = m.as_pandas_table()
+
+    with open(file_to_save_gp_fit_logs, 'wb') as f:
+        pickle.dump(gp_fit_logs, f, protocol=-1)
 
     #plot(m)
     #print(m.read_trainables())
