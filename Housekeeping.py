@@ -1,14 +1,35 @@
 import numpy as np
 
+
+############## Specific to MuJoCo tasks only #################################
+NUMBER_VALIDATION_TRIALS = 10
+EXPERT_EPISODES_TO_LOG = 1000
+
+VIDEO_LOGS_DIRECTORY = 'video_logs/'
+
+EXPERT_TRAJECTORY_KEY = 'expert_trajectories_key'
+SCALE_KEY = 'scale_key'
+OFFSET_KEY = 'offset_key'
+
+EXPERT_OBSERVATIONS_KEY = 'expert_observations_key'
+EXPERT_ACTIONS_KEY = 'expert_actions_key'
+EXPERT_REWARDS_KEY = 'expert_rewards_key'
+EXPERT_UNSCALED_OBSERVATIONS_KEY = 'expert_unscaled_observations_key'
+##############################################################################
+
+
+############## Specific to sliding block experiment only #####################
 MAXIMUM_NUMBER_OF_STEPS  = 20
 
 ALL_BLOCK_MASSES_TO_VALIDATE = np.linspace(1., 100., 100)
 INITIALIZATION_STATES_TO_VALIDATE = np.array([[-5., -5.], [5., -5.], [2.5, -2.5], [-2.5, 2.5], [-5., 5.], [5., 5.]])
+##############################################################################
 
 #Defining colors for highlighting important aspects
 GREEN = lambda x: '\x1b[32m{}\x1b[0m'.format(x)
 BLUE = lambda x: '\x1b[34m{}\x1b[0m'.format(x)
 RED = lambda x: '\x1b[31m{}\x1b[0m'.format(x)
+
 
 INPUT_MANIPULATION_DIRECTORY = 'input_manipulation_directory/'
 TENSORBOARD_DIRECTORY = 'tensorboard_directory/'
