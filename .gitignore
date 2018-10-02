@@ -4,9 +4,13 @@
 MuJoCo/logs/*
 MuJoCo/expert_trajectories/*
 MuJoCo/expert_controller_reward_log/*
+<<<<<<< HEAD
 MuJoCo/saved_expert_models/*
 MuJoCo/.ipynb_checkpoints/*
 MuJoCo/__pycache__/*
 .DS_Store
 .ipynb_checkpoints/*
 __pycache__/*
+=======
+
+>>>>>>> 7e19f9c... git ignore added and MuJoCo proposed mechanism code also added
