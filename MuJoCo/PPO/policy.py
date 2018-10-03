@@ -10,7 +10,7 @@ import sys, os
 
 class Policy(object):
     """ NN-based policy approximation """
-    def __init__(self, obs_dim, act_dim, kl_targ, hid1_mult, policy_logvar, env_name='env_not_passed_as_param', context='context_not_set'):
+    def __init__(self, obs_dim, act_dim, kl_targ, hid1_mult, policy_logvar, env_name='env_not_passed_as_param', task_identity='task_identity_not_set'):
         """
         Args:
             obs_dim: num observation dimensions (int)
@@ -29,10 +29,10 @@ class Policy(object):
         self.lr_multiplier = 1.0  # dynamically adjust lr when D_KL out of control
         self.obs_dim = obs_dim
         self.act_dim = act_dim
-        self._build_graph(env_name, context)
+        self._build_graph(env_name, task_identity)
         self._init_session()
 
-    def _build_graph(self, env_name, context):
+    def _build_graph(self, env_name, task_identity):
         """ Build and initialize TensorFlow graph """
         self.g = tf.Graph()
         with self.g.as_default():
@@ -42,11 +42,16 @@ class Policy(object):
             self._kl_entropy()
             self._sample()
             self._loss_train_op()
-            self._saver_object(env_name, context)
+            self._saver_object(env_name, task_identity)
             self.init = tf.global_variables_initializer()
 
+<<<<<<< HEAD
     def _saver_object(self, env_name, context):
         self.directory_to_save_final_model = '../saved_final_model_expert/' + env_name + '/' + context + '/'
+=======
+    def _saver_object(self, env_name, task_identity):
+        self.directory_to_save_final_model = '../' + SAVED_EXPERT_MODELS_DIRECTORY + env_name + '/' + task_identity + '/'
+>>>>>>> c8d83b2... Proposed Mechanism for MuJoCo added
         if not os.path.exists(self.directory_to_save_final_model):
             os.makedirs(self.directory_to_save_final_model)
         self.saver = tf.train.Saver(max_to_keep=10, keep_checkpoint_every_n_hours=2)

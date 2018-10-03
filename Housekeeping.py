@@ -2,19 +2,41 @@ import numpy as np
 
 
 ############## Specific to MuJoCo tasks only #################################
+<<<<<<< HEAD
 NUMBER_VALIDATION_TRIALS = 10
 EXPERT_EPISODES_TO_LOG = 1000
 
 VIDEO_LOGS_DIRECTORY = 'video_logs/'
+=======
+ALL_MUJOCO_TASK_IDENTITIES = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19])
+
+NUMBER_VALIDATION_TRIALS = 3
+EXPERT_EPISODES_TO_LOG = 100
+
+VIDEO_LOGS_DIRECTORY = 'video_logs/'
+EXPERT_TRAJECTORIES_DIRECTORY = 'expert_trajectories/'
+EXPERT_CONTROLLER_REWARD_LOG_DIRECTORY = 'expert_controller_reward_log/'
+>>>>>>> c8d83b2... Proposed Mechanism for MuJoCo added
 
 EXPERT_TRAJECTORY_KEY = 'expert_trajectories_key'
 SCALE_KEY = 'scale_key'
 OFFSET_KEY = 'offset_key'
 
+<<<<<<< HEAD
 EXPERT_OBSERVATIONS_KEY = 'expert_observations_key'
 EXPERT_ACTIONS_KEY = 'expert_actions_key'
 EXPERT_REWARDS_KEY = 'expert_rewards_key'
 EXPERT_UNSCALED_OBSERVATIONS_KEY = 'expert_unscaled_observations_key'
+=======
+EXPERT_OBSERVATIONS_KEY = 'observes'
+EXPERT_ACTIONS_KEY = 'actions'
+EXPERT_REWARDS_KEY = 'rewards'
+EXPERT_UNSCALED_OBSERVATIONS_KEY = 'unscaled_obs'
+TASKS_TRAINED_ON_KEY = 'tasks_trained_on_key'
+TASKS_ENCOUNTERED_KEY = 'tasks_encountered_key'
+
+TOTAL_SIMULATION_ITERATIONS = 5
+>>>>>>> c8d83b2... Proposed Mechanism for MuJoCo added
 ##############################################################################
 
 
@@ -24,6 +46,13 @@ MAXIMUM_NUMBER_OF_STEPS  = 20
 ALL_BLOCK_MASSES_TO_VALIDATE = np.linspace(1., 100., 100)
 INITIALIZATION_STATES_TO_VALIDATE = np.array([[-5., -5.], [5., -5.], [2.5, -2.5], [-2.5, 2.5], [-5., 5.], [5., 5.]])
 ##############################################################################
+
+
+############## Detector #############################
+CURRENT_DETECTOR_UNCERTAINTY_KEY = 'current_detector_uncertainty_key'
+CURRENT_DETECTOR_UNCERTAINTY_THRESHOLD_KEY = 'current_detector_uncertainty_threshold_key'
+RUNNING_DETECTOR_WINDOW_KEY = 'running_detector_window_key'
+
 
 #Defining colors for highlighting important aspects
 GREEN = lambda x: '\x1b[32m{}\x1b[0m'.format(x)
@@ -36,6 +65,8 @@ TENSORBOARD_DIRECTORY = 'tensorboard_directory/'
 SAVED_MODELS_DURING_ITERATIONS_DIRECTORY = 'saved_models_during_iterations/'
 SAVED_FINAL_MODEL_DIRECTORY = 'saved_final_model/'
 LOGS_DIRECTORY = 'logs/'
+
+LAST_TRAINING_TASK_ITERATION_KEY = 'last_training_task_iteration_key'
 
 MEAN_KEY_X = 'mean_key_x'
 DEVIATION_KEY_X = 'deviation_key_x'
@@ -103,22 +134,44 @@ def get_mean_and_deviation(data):
   return mean_data, deviation_data
 
 
-def get_sliding_block_context_from_code(context_code):
-  if context_code == 0:
+def get_sliding_block_masses_from_task_identifier_as_string(task_identifier):
+  if task_identifier == 0:
+    contexts = '10'
+  elif task_identifier == 1:
+    contexts = '25'
+  elif task_identifier == 2:
+    contexts = '50'
+  elif task_identifier == 3:
+    contexts = '65'
+  elif task_identifier == 4:
+    contexts = '80'
+  elif task_identifier == 5:
+    contexts = '80, 85'
+  elif task_identifier == 6:
+    contexts = '5, 10'
+  elif task_identifier == 7:
+    contexts = '40, 60'
+  else: 
+    contexts = '10, 90'
+  return contexts
+
+
+def get_sliding_block_masses_from_task_identifier(task_identifier):
+  if task_identifier == 0:
     contexts = [10.]
-  elif context_code == 1:
+  elif task_identifier == 1:
     contexts = [25.]
-  elif context_code == 2:
+  elif task_identifier == 2:
     contexts = [50.]
-  elif context_code == 3:
+  elif task_identifier == 3:
     contexts = [65.]
-  elif context_code == 4:
+  elif task_identifier == 4:
     contexts = [80.]
-  elif context_code == 5:
+  elif task_identifier == 5:
     contexts = [80., 85.]
-  elif context_code == 6:
+  elif task_identifier == 6:
     contexts = [5., 10.]
-  elif context_code == 7:
+  elif task_identifier == 7:
     contexts = [40., 60.]
   else: 
     contexts = [10., 90.]

@@ -38,9 +38,17 @@ import argparse
 import signal
 import _pickle as pickle
 
+<<<<<<< HEAD
 sys.path.insert(0, '../utilities/')
 from general_settings import *
 from tweak_context import get_contextual_MUJOCO_environment
+=======
+sys.path.insert(0, './../../')
+from Housekeeping import *
+
+sys.path.insert(0, './../')
+from multiple_tasks import get_task_on_MUJOCO_environment
+>>>>>>> c8d83b2... Proposed Mechanism for MuJoCo added
 
 
 class GracefulKiller:
@@ -54,7 +62,7 @@ class GracefulKiller:
         self.kill_now = True
 
 
-def init_gym(env_name, context):
+def init_gym(env_name, task_identity):
     """
     Initialize gym environment, return dimension of observation
     and action spaces.
@@ -69,7 +77,7 @@ def init_gym(env_name, context):
     """
     #env = gym.make(env_name)
 
-    env = get_contextual_MUJOCO_environment(env_name=env_name, context=context)
+    env = get_task_on_MUJOCO_environment(env_name=env_name, task_identity=task_identity)
 
     obs_dim = env.observation_space.shape[0]
     act_dim = env.action_space.shape[0]
@@ -268,7 +276,7 @@ def log_batch_stats(observes, actions, advantages, disc_sum_rew, logger, episode
                 })
 
 
-def main(env_name, num_episodes, gamma, lam, kl_targ, batch_size, hid1_mult, policy_logvar, context):
+def main(env_name, num_episodes, gamma, lam, kl_targ, batch_size, hid1_mult, policy_logvar, task_identity):
     """ Main training loop
 
     Args:
@@ -281,16 +289,16 @@ def main(env_name, num_episodes, gamma, lam, kl_targ, batch_size, hid1_mult, pol
         hid1_mult: hid1 size for policy and value_f (mutliplier of obs dimension)
         policy_logvar: natural log of initial policy variance
     """
-    print('Training started for ' + env_name + ' and context ' + str(context))
+    print('Training started for ' + env_name + ' and task_identity ' + str(task_identity))
 
     killer = GracefulKiller()
-    env, obs_dim, act_dim = init_gym(env_name=env_name, context=context)
+    env, obs_dim, act_dim = init_gym(env_name=env_name, task_identity=task_identity)
     obs_dim += 1  # add 1 to obs dimension for time step feature (see run_episode())
     now = datetime.utcnow().strftime("%b-%d_%H:%M:%S")  # create unique directories
     logger = Logger(logname=env_name, now=now)
     scaler = Scaler(obs_dim)
     val_func = NNValueFunction(obs_dim, hid1_mult)
-    policy = Policy(obs_dim, act_dim, kl_targ, hid1_mult, policy_logvar, env_name, context)
+    policy = Policy(obs_dim, act_dim, kl_targ, hid1_mult, policy_logvar, env_name, task_identity)
     # run a few episodes of untrained policy to initialize scaler:
     run_policy(env, policy, scaler, logger, episodes=5)
     episode = 0
@@ -315,7 +323,7 @@ def main(env_name, num_episodes, gamma, lam, kl_targ, batch_size, hid1_mult, pol
 
     scale, offset = scaler.get()
     #scale_and_offset_data = {'scale': scale, 'offset': offset}
-    #scale_and_offset_file = 'scale_and_offset_file_' + env_name + '_' + context + '.pkl'
+    #scale_and_offset_file = 'scale_and_offset_file_' + env_name + '_' + task_identity + '.pkl'
     #with open(scale_and_offset_file, 'wb') as f:
     #    pickle.dump(scale_and_offset_data, f)
     #### Saving expert trajectories after sufficient training has been made
@@ -324,10 +332,18 @@ def main(env_name, num_episodes, gamma, lam, kl_targ, batch_size, hid1_mult, pol
     #env = wrappers.Monitor(env, aigym_path, force=True)
     trajectories = run_policy(env, policy, scaler, logger, episodes=EXPERT_EPISODES_TO_LOG)
     data_to_store = {EXPERT_TRAJECTORY_KEY: trajectories, SCALE_KEY: scale, OFFSET_KEY: offset}
+<<<<<<< HEAD
     if not os.path.exists(EXPERT_TRAJECTORIES_DIRECTORY):
         os.makedirs(EXPERT_TRAJECTORIES_DIRECTORY)
     FILE_NAME = EXPERT_TRAJECTORIES_DIRECTORY + env_name + '_' + context + '.pkl'
     with open(FILE_NAME, "wb") as f:
+=======
+    directory_to_store_trajectories = './../' + EXPERT_TRAJECTORIES_DIRECTORY
+    if not os.path.exists(directory_to_store_trajectories):
+        os.makedirs(directory_to_store_trajectories)
+    file_to_store_trajectories = directory_to_store_trajectories + env_name + '_' + task_identity + '.pkl'
+    with open(file_to_store_trajectories, "wb") as f:
+>>>>>>> c8d83b2... Proposed Mechanism for MuJoCo added
         pickle.dump(data_to_store, f)
 
     logger.close()
@@ -357,8 +373,8 @@ if __name__ == "__main__":
                         help='Initial policy log-variance (natural log of variance)',
                         default=-1.0)
 
-    parser.add_argument('-c', '--context', type=str,
-                        help='The changing context during operation of a controller',
+    parser.add_argument('-ti', '--task_identity', type=str,
+                        help='The changing task_identity during operation of a controller',
                         default='0')
 
     args = parser.parse_args()
