@@ -7,16 +7,16 @@ sys.path.insert(0,'./../')
 from Housekeeping import *
 
 def getDemonstrationsFromTask(domain_name, task_identity, window_size, number_demonstrations):
-    file_name = EXPERT_TRAJECTORIES_DIRECTORY + domain_name + '_' + str(task_identity) + '.pkl'
+    file_name = DEMONSTRATOR_TRAJECTORIES_DIRECTORY + domain_name + '_' + str(task_identity) + '.pkl'
     with open(file_name, "rb") as f:
         data_stored = pickle.load(f)
-    expert_trajectories = data_stored[EXPERT_TRAJECTORY_KEY]
+    demonstrator_trajectories = data_stored[DEMONSTRATOR_TRAJECTORY_KEY]
     moving_windows_x_task, moving_windows_y_task = None, None
-    for episode in expert_trajectories[:number_demonstrations]:
-        observations = episode[EXPERT_OBSERVATIONS_KEY]
-        actions = episode[EXPERT_ACTIONS_KEY]
-        rewards = episode[EXPERT_REWARDS_KEY]
-        unscaled_observations = episode[EXPERT_UNSCALED_OBSERVATIONS_KEY]
+    for episode in demonstrator_trajectories[:number_demonstrations]:
+        observations = episode[DEMONSTRATOR_OBSERVATIONS_KEY]
+        actions = episode[DEMONSTRATOR_ACTIONS_KEY]
+        rewards = episode[DEMONSTRATOR_REWARDS_KEY]
+        unscaled_observations = episode[DEMONSTRATOR_UNSCALED_OBSERVATIONS_KEY]
 
         drift_per_time_step, moving_windows_x_size, moving_windows_y_size = get_moving_window_size(observation_sample=unscaled_observations[:1], action_sample=actions[:1], window_size=window_size)
 

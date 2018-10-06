@@ -2,41 +2,28 @@ import numpy as np
 
 
 ############## Specific to MuJoCo tasks only #################################
-<<<<<<< HEAD
-NUMBER_VALIDATION_TRIALS = 10
-EXPERT_EPISODES_TO_LOG = 1000
-
-VIDEO_LOGS_DIRECTORY = 'video_logs/'
-=======
 ALL_MUJOCO_TASK_IDENTITIES = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19])
 
 NUMBER_VALIDATION_TRIALS = 3
-EXPERT_EPISODES_TO_LOG = 100
+DEMONSTRATOR_EPISODES_TO_LOG = 5
 
 VIDEO_LOGS_DIRECTORY = 'video_logs/'
-EXPERT_TRAJECTORIES_DIRECTORY = 'expert_trajectories/'
-EXPERT_CONTROLLER_REWARD_LOG_DIRECTORY = 'expert_controller_reward_log/'
->>>>>>> c8d83b2... Proposed Mechanism for MuJoCo added
+DEMONSTRATOR_TRAJECTORIES_DIRECTORY = 'demonstrator_trajectories/'
+DEMONSTRATOR_CONTROLLER_REWARD_LOG_DIRECTORY = 'demonstrator_controller_reward_log/'
 
-EXPERT_TRAJECTORY_KEY = 'expert_trajectories_key'
-SCALE_KEY = 'scale_key'
-OFFSET_KEY = 'offset_key'
+#Use better naming convention in future whenever you get any opportunity
+DEMONSTRATOR_TRAJECTORY_KEY = 'demonstrator_trajectory_key'
+SCALE_KEY = 'scale'
+OFFSET_KEY = 'offset'
 
-<<<<<<< HEAD
-EXPERT_OBSERVATIONS_KEY = 'expert_observations_key'
-EXPERT_ACTIONS_KEY = 'expert_actions_key'
-EXPERT_REWARDS_KEY = 'expert_rewards_key'
-EXPERT_UNSCALED_OBSERVATIONS_KEY = 'expert_unscaled_observations_key'
-=======
-EXPERT_OBSERVATIONS_KEY = 'observes'
-EXPERT_ACTIONS_KEY = 'actions'
-EXPERT_REWARDS_KEY = 'rewards'
-EXPERT_UNSCALED_OBSERVATIONS_KEY = 'unscaled_obs'
+DEMONSTRATOR_OBSERVATIONS_KEY = 'observes'
+DEMONSTRATOR_ACTIONS_KEY = 'actions'
+DEMONSTRATOR_REWARDS_KEY = 'rewards'
+DEMONSTRATOR_UNSCALED_OBSERVATIONS_KEY = 'unscaled_obs'
 TASKS_TRAINED_ON_KEY = 'tasks_trained_on_key'
 TASKS_ENCOUNTERED_KEY = 'tasks_encountered_key'
 
 TOTAL_SIMULATION_ITERATIONS = 5
->>>>>>> c8d83b2... Proposed Mechanism for MuJoCo added
 ##############################################################################
 
 
@@ -62,6 +49,7 @@ RED = lambda x: '\x1b[31m{}\x1b[0m'.format(x)
 
 INPUT_MANIPULATION_DIRECTORY = 'input_manipulation_directory/'
 TENSORBOARD_DIRECTORY = 'tensorboard_directory/'
+SAVED_DEMONSTRATOR_MODELS_DIRECTORY = 'saved_demonstrator_models/'
 SAVED_MODELS_DURING_ITERATIONS_DIRECTORY = 'saved_models_during_iterations/'
 SAVED_FINAL_MODEL_DIRECTORY = 'saved_final_model/'
 LOGS_DIRECTORY = 'logs/'
@@ -82,8 +70,9 @@ OPTIMIZED_GP_TRAINABLES_KEY = 'optimized_GP_trainables_key'
 MEAN_GP_FIT_PREDICTIVE_ERROR_KEY = 'mean_GP_fit_predictive_error_key'
 MEAN_GP_FIT_VARIANCE_KEY = 'mean_GP_fit_variance_key'
 
-EXPERIMENT_ID_KEY = 'experiment_id_key'
+DOMAIN_KEY = 'domain_key'
 BEHAVIORAL_CONTROLLER_KEY = 'behavioral_controller_key'
+BEHAVIORAL_CONTROLLER_PROFILE_KEY = 'behavior_controller_profile_key'
 TARGET_CONTROLLER_KEY = 'target_controller_key'
 CONTEXTS_KEY = 'contexts_key'
 CONTEXT_CODE_KEY = 'context_code_key'
@@ -95,6 +84,7 @@ OBSERVATIONS_LOG_KEY = 'observations_log_key'
 DEMONSTRATOR_CONTROLS_LOG_KEY = 'demonstrator_controls_log_key'
 DEMONSTRATOR_COSTS_LOG_KEY = 'demonstrator_costs_log_key'
 
+BEHAVIORAL_CONTROL_REWARDS_LOG_KEY = 'behavioral_control_rewards_log_key'
 BEHAVIORAL_CONTROL_COSTS_LOG_KEY = 'behavioral_control_costs_log_key'
 BEHAVIORAL_CONTROL_DEVIATIONS_LOG_KEY = 'behavioral_control_deviations_log_key'
 BEHAVIORAL_CONTROL_MEANS_LOG_KEY = 'behavioral_control_means_log_key'
@@ -105,7 +95,7 @@ TARGET_CONTROL_COSTS_LOG_KEY = 'target_control_costs_log_key'
 TARGET_CONTROL_DEVIATIONS_LOG_KEY = 'target_control_deviations_log_key'
 TARGET_CONTROL_MEANS_LOG_KEY = 'target_control_means_log_key'
 
-matplotlibcolors = ['black', 'red', 'sienna', 'sandybrown', 'gold', 'olivedrab', 'deepskyblue', 'blue', 'red', 'chartreuse', 'darkcyan']
+matplotlibcolors = ['black', 'red', 'deepskyblue', 'olivedrab', 'sienna', 'sandybrown', 'gold', 'blue', 'chartreuse', 'darkcyan']
 barwidth = 0.25
 
 ##############################################################

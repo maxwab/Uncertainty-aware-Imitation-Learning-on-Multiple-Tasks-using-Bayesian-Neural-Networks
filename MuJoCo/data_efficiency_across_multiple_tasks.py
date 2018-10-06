@@ -5,7 +5,7 @@ import copy
 import tensorflow as tf
 #from datetime import datetime
 
-from Load_Controllers import Load_BBB, Load_Expert
+from Load_Controllers import Load_BBB, Load_Demonstrator
 
 from tqdm import tqdm
 from multiple_tasks import get_task_on_MUJOCO_environment
@@ -79,7 +79,7 @@ def validate_BBB(domain_name, task_identity, configuration_identity):
 
         demonstrator_graph = tf.Graph()
         with demonstrator_graph.as_default():
-            demonstrator_controller = Load_Expert(domain_name=domain_name, task_identity=str(task_to_validate))
+            demonstrator_controller = Load_Demonstrator(domain_name=domain_name, task_identity=str(task_to_validate))
 
         for validation_trial in range(NUMBER_VALIDATION_TRIALS):
             all_observations = []

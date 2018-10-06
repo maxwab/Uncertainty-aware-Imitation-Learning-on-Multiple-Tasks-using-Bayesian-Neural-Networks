@@ -9,7 +9,7 @@ sys.path.insert(0,'./../')
 from Housekeeping import *
 
 
-def plotExperts(env_name, expert_rewards_over_all_contexts, identifier):
+def plotDemonstrators(env_name, demonstrator_rewards_over_all_contexts, identifier):
     if env_name == 'Reacher':
         threshold = -3.75
         minimim = -50.
@@ -61,23 +61,23 @@ def plotExperts(env_name, expert_rewards_over_all_contexts, identifier):
         maximum = 100000.
         random_reward = 33902.78
 
-    expert_plot_directory = './../' + EXPERT_CONTROLLER_REWARD_LOG_DIRECTORY + env_name + '/'
-    if not os.path.exists(expert_plot_directory):
-        os.makedirs(expert_plot_directory)
-    expert_file_name = expert_plot_directory + str(identifier) + '.png'
+    demonstrator_plot_directory = './../' + DEMONSTRATOR_CONTROLLER_REWARD_LOG_DIRECTORY + env_name + '/'
+    if not os.path.exists(demonstrator_plot_directory):
+        os.makedirs(demonstrator_plot_directory)
+    demonstrator_file_name = demonstrator_plot_directory + str(identifier) + '.png'
 
-    plt.plot(ALL_MUJOCO_TASK_IDENTITIES, expert_rewards_over_all_contexts, label='expert controller')
-    #plt.plot([ALL_MUJOCO_TASK_IDENTITIES[expert_context]], [expert_rewards_over_all_contexts[expert_context]], 'ko', label='expert context')
+    plt.plot(ALL_MUJOCO_TASK_IDENTITIES, demonstrator_rewards_over_all_contexts, label='Demonstrator')
+    #plt.plot([ALL_MUJOCO_TASK_IDENTITIES[demonstrator_context]], [demonstrator_rewards_over_all_contexts[demonstrator_context]], 'ko', label='demonstrator context')
     plt.axhline(y=threshold, color='r', linestyle='-', label='Threshold for success')
     plt.axhline(y=random_reward, color='g', linestyle='-', label='Random Controller')
     plt.ylim(ymin=minimim)
     plt.ylim(ymax=maximum)
-    plt.xlabel('Contexts')
+    plt.xlabel('Tasks')
     plt.ylabel('Rewards')
     plt.title('Trained context is ' + str(identifier))
     plt.legend()
 
-    plt.savefig(expert_file_name)
+    plt.savefig(demonstrator_file_name)
     plt.close('all')
 
 

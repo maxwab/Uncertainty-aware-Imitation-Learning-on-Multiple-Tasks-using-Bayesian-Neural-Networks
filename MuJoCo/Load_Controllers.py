@@ -37,19 +37,19 @@ class Load_BBB():
 		self.tasks_encountered = stored_meta_data[TASKS_ENCOUNTERED_KEY]
 
 
-class Load_Expert():
+class Load_Demonstrator():
 	def __init__(self, domain_name, task_identity):
 		self.getScaleAndOffset(domain_name, task_identity)
-		saved_final_model_expert = SAVED_EXPERT_MODELS_DIRECTORY + domain_name + '/' + task_identity + '/'
-		imported_meta = tf.train.import_meta_graph(saved_final_model_expert + 'final.meta')
+		saved_final_model_demonstrator = SAVED_DEMONSTRATOR_MODELS_DIRECTORY + domain_name + '/' + task_identity + '/'
+		imported_meta = tf.train.import_meta_graph(saved_final_model_demonstrator + 'final.meta')
 		self.sess = tf.Session()
-		imported_meta.restore(self.sess, tf.train.latest_checkpoint(saved_final_model_expert))
+		imported_meta.restore(self.sess, tf.train.latest_checkpoint(saved_final_model_demonstrator))
 		graph = tf.get_default_graph()
 		self.scaled_observation_node = graph.get_tensor_by_name('obs:0')
 		self.output_action_node = graph.get_tensor_by_name('output_action:0')
 
 	def getScaleAndOffset(self, domain_name, task_identity):
-		file_name = EXPERT_TRAJECTORIES_DIRECTORY + domain_name + '_' + task_identity + '.pkl'
+		file_name = DEMONSTRATOR_TRAJECTORIES_DIRECTORY + domain_name + '_' + task_identity + '.pkl'
 		with open(file_name, "rb") as f:
 			data_stored = pickle.load(f)
 		self.scale = data_stored[SCALE_KEY]
