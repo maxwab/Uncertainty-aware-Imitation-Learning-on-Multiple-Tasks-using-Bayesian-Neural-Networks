@@ -66,13 +66,11 @@ def final_flourish(all_task_configurations, uncertainty_ylim, cost_ylim, predict
 
     plt.show()    
 
-<<<<<<< HEAD:Plots.py
 def visualize_learner(all_task_configurations, uncertainty_ylim, cost_ylim, predictive_error_ylim):
     demonstrator_logs_file = './' + all_task_configurations[0][EXPERIMENT_ID_KEY] + '/' + LOGS_DIRECTORY + 'demonstrator_logs.pkl'
-=======
+
 def compare_generalization_in_controllers(all_task_configurations, uncertainty_ylim, cost_ylim, predictive_error_ylim):
     demonstrator_logs_file = LOGS_DIRECTORY + 'demonstrator_logs.pkl'
->>>>>>> c8d83b2... Proposed Mechanism for MuJoCo added:sliding_block/Plots.py
     with open(demonstrator_logs_file, 'rb') as f:
         demonstrator_data = pickle.load(f)
     
@@ -82,14 +80,11 @@ def compare_generalization_in_controllers(all_task_configurations, uncertainty_y
     ax_3 = fig.add_subplot(323, frameon=False)
     gp_exists = False
     for iterator, configuration in enumerate(all_task_configurations):
-<<<<<<< HEAD:Plots.py
         file_to_load_data_from = './' + configuration[EXPERIMENT_ID_KEY] + '/' + LOGS_DIRECTORY + configuration[CONTEXT_CODE_KEY] + '_' + configuration[WINDOW_SIZE_KEY] + '_' + configuration[PARTIAL_OBSERVABILITY_KEY] + '_' + configuration[BEHAVIORAL_CONTROLLER_KEY] + '.pkl'
         configuration_label = 'Block Mass:' + str(get_sliding_block_context_from_code(int(configuration[CONTEXT_CODE_KEY]))) + ', window size:' + configuration[WINDOW_SIZE_KEY] + ', partial obs.:' + configuration[PARTIAL_OBSERVABILITY_KEY] + ', controller:' + configuration[BEHAVIORAL_CONTROLLER_KEY]
-=======
         file_to_load_data_from = LOGS_DIRECTORY + configuration[CONTEXT_CODE_KEY] + '_' + configuration[WINDOW_SIZE_KEY] + '_' + configuration[PARTIAL_OBSERVABILITY_KEY] + '_' + configuration[BEHAVIORAL_CONTROLLER_KEY] + '.pkl'
         #configuration_label = 'Block Mass:' + str(get_sliding_block_context_from_code(int(configuration[CONTEXT_CODE_KEY]))) + ', window size:' + configuration[WINDOW_SIZE_KEY] + ', partial obs.:' + configuration[PARTIAL_OBSERVABILITY_KEY] + ', controller:' + configuration[BEHAVIORAL_CONTROLLER_KEY]
         configuration_label = configuration[BEHAVIORAL_CONTROLLER_KEY] + ' controller, trained on block mass ' + str(get_sliding_block_masses_from_task_identifier_as_string(task_identifier=int(configuration[CONTEXT_CODE_KEY]))) + configuration[PARTIAL_OBSERVABILITY_KEY]
->>>>>>> c8d83b2... Proposed Mechanism for MuJoCo added:sliding_block/Plots.py
         with open(file_to_load_data_from, 'rb') as f:
             loaded_data = pickle.load(f)
         all_tasks = list(loaded_data.keys())

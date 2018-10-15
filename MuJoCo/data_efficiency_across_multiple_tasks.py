@@ -211,6 +211,9 @@ def data_efficient_imitation_across_multiple_tasks(domain_name, window_size, num
     for simulation_iterator in range(TOTAL_SIMULATION_ITERATIONS):
         random.shuffle(ALL_MUJOCO_TASK_IDENTITIES)
 
+        if simulation_iterator ==0 :
+            continue
+
         ###### Naive Controller ######
         all_gathered_x, all_gathered_y = None, None
         tasks_trained_on, tasks_encountered = [], []
@@ -269,6 +272,7 @@ def data_efficient_imitation_across_multiple_tasks(domain_name, window_size, num
 
         print(GREEN('Starting runs for the BBB controller'))
         for task_iterator in ALL_MUJOCO_TASK_IDENTITIES:
+            print(RED('Simulation iteration is ' + str(simulation_iterator) + ' and task iterator is ' + str(task_iterator)))
             tasks_encountered.append(current_task_identity)
             detector.reset()
 
@@ -345,7 +349,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     data_efficient_imitation_across_multiple_tasks(domain_name=args.domain_name, window_size=args.window_size, number_demonstrations=args.number_demonstrations, adapt_detector_threshold=str_to_bool(args.adapt_detector_threshold),
-     start_monitoring_at_time_step=args.start_monitoring_at_time_step, detector_c=args.detector_c, detector_m=args.detector_m, initial_detector_threshold=args.initial_detector_threshold, epochs = 10001, number_mini_batches = 20,
+     start_monitoring_at_time_step=args.start_monitoring_at_time_step, detector_c=args.detector_c, detector_m=args.detector_m, initial_detector_threshold=args.initial_detector_threshold, epochs = 8001, number_mini_batches = 20,
       activation_unit = 'RELU', learning_rate = 0.001, hidden_units= [90, 30, 10], number_samples_variance_reduction = 25, precision_alpha = 0.01,
        weights_prior_mean_1 = 0., weights_prior_mean_2 = 0., weights_prior_deviation_1 = 0.4, weights_prior_deviation_2 = 0.4, mixture_pie = 0.7, rho_mean = -3.,
         extra_likelihood_emphasis = 10000000000000000.)
