@@ -2,7 +2,8 @@ import numpy as np
 
 
 ############## Specific to MuJoCo tasks only #################################
-ALL_MUJOCO_TASK_IDENTITIES = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19])
+#ALL_MUJOCO_TASK_IDENTITIES = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19])
+ALL_MUJOCO_TASK_IDENTITIES = np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
 
 NUMBER_VALIDATION_TRIALS = 3
 DEMONSTRATOR_EPISODES_TO_LOG = 5
@@ -54,7 +55,7 @@ SAVED_MODELS_DURING_ITERATIONS_DIRECTORY = 'saved_models_during_iterations/'
 SAVED_FINAL_MODEL_DIRECTORY = 'saved_final_model/'
 LOGS_DIRECTORY = 'logs/'
 
-LAST_TRAINING_TASK_ITERATION_KEY = 'last_training_task_iteration_key'
+TRAINING_TASK_ITERATION_KEY = 'training_task_iteration_key'
 
 MEAN_KEY_X = 'mean_key_x'
 DEVIATION_KEY_X = 'deviation_key_x'

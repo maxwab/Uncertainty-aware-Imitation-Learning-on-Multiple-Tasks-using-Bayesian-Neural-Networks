@@ -1,5 +1,3 @@
-import matplotlib
-matplotlib.use('agg')
 import matplotlib.pyplot as plt
 import numpy as np, os, sys, _pickle as pickle
 
@@ -7,6 +5,57 @@ import sys
 #sys.path.insert(0,'./../Task_Agnostic_Online_Multitask_Imitation_Learning/')
 sys.path.insert(0,'./../')
 from Housekeeping import *
+
+
+def compare_data_efficiency(all_configurations, demonstration_request_to_gauge):
+    simulation_iterator = 0
+    x_axis_ticks = []
+    cumulative_rewards_to_plot = []
+    for configuration in all_configurations:
+        if configuration['controller'] == 'bbb_controller':    
+            log_file = LOGS_DIRECTORY + configuration['domain_name'] + '/bbb_controller/detector_c_' + str(configuration['detector_c']) + '_detector_m_' + str(configuration['detector_m']) + '/' + str(simulation_iterator) + '/meta_data.pkl'
+            with open(log_file, 'rb') as f:
+                logged_evaluation_data = pickle.load(f)
+            validation_logs_to_probe = LOGS_DIRECTORY + configuration['domain_name'] + '/bbb_controller/detector_c_' + str(configuration['detector_c']) + '_detector_m_' + str(configuration['detector_m']) + '/' + str(simulation_iterator) + '/' + str(logged_evaluation_data[TRAINING_TASK_ITERATION_KEY][demonstration_request_to_gauge-1]) + '/validation_logs.pkl'
+            label = '$c=' + str(configuration['detector_c']) + '$\n$m=' + str(configuration['detector_m']) + '$'
+        elif configuration['controller'] == 'naive_controller':    
+            validation_logs_to_probe = LOGS_DIRECTORY + configuration['domain_name'] + '/naive_controller/' + str(simulation_iterator) + '/' + str(demonstration_request_to_gauge-1) + '/validation_logs.pkl'
+            label = 'Naive'
+        x_axis_ticks.append(label)
+        cumulative_reward_over_all_tasks = 0.
+        with open(validation_logs_to_probe, 'rb') as f:
+            logged_evaluation_data = pickle.load(f)
+        for validation_task in ALL_MUJOCO_TASK_IDENTITIES:
+            episodic_rewards = [logged_evaluation_data[str(validation_task)][str(validation_trial)][BEHAVIORAL_CONTROL_REWARDS_LOG_KEY] for validation_trial in range(NUMBER_VALIDATION_TRIALS)]
+            episodic_rewards = np.array(episodic_rewards)
+            cumulative_reward_over_all_tasks += np.sum(np.mean(episodic_rewards, axis=0))
+        cumulative_rewards_to_plot.append(cumulative_reward_over_all_tasks)
+    plt.bar(x_axis_ticks, cumulative_rewards_to_plot)
+    plt.xlabel('Configuration', fontweight='bold')
+    plt.ylabel('$\sum_d^D$', fontweight='bold')
+    plt.title('Data-Efficiency', fontsize=18)
+    plt.legend()
+    plt.show()
+
+
+def compare_conservativeness(domain_name):
+    simulation_iterator = 0
+
+    #log_file = LOGS_DIRECTORY + domain_name + '/naive_controller/' + str(simulation_iterator) + '/meta_data.pkl'
+    #with open(log_file, 'rb') as f:
+    #    logged_evaluation_data = pickle.load(f)
+    #last_trained_task = logged_evaluation_data[TRAINING_TASK_ITERATION_KEY] 
+
+    log_file = LOGS_DIRECTORY + domain_name + '/naive_controller/' + str(simulation_iterator) + '/' + str(len(ALL_MUJOCO_TASK_IDENTITIES)-1) + '/validation_logs.pkl'
+    cumulative_reward_over_all_tasks = 0.
+    with open(log_file, 'rb') as f:
+        logged_evaluation_data = pickle.load(f)
+
+    for validation_task in ALL_MUJOCO_TASK_IDENTITIES:
+        episodic_rewards = [logged_evaluation_data[str(validation_task)][str(validation_trial)][BEHAVIORAL_CONTROL_REWARDS_LOG_KEY] for validation_trial in range(NUMBER_VALIDATION_TRIALS)]
+        episodic_rewards = np.array(episodic_rewards)
+        cumulative_reward_over_all_tasks += np.sum(np.mean(episodic_rewards, axis=0))
+        break
 
 
 def plotDemonstrators(env_name, demonstrator_rewards_over_all_contexts, identifier):
