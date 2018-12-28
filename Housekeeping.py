@@ -23,6 +23,9 @@ DEMONSTRATOR_REWARDS_KEY = 'rewards'
 DEMONSTRATOR_UNSCALED_OBSERVATIONS_KEY = 'unscaled_obs'
 TASKS_TRAINED_ON_KEY = 'tasks_trained_on_key'
 TASKS_ENCOUNTERED_KEY = 'tasks_encountered_key'
+DETECTOR_THRESHOLD_KEY = 'detector_threshold_key'
+CURRENT_TIME_STEP_KEY = 'current_time_step_key'
+STATS_KEY = 'stats_key'
 
 TOTAL_SIMULATION_ITERATIONS = 5
 ##############################################################################

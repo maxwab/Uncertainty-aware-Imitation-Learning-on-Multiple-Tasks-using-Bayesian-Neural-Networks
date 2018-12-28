@@ -7,10 +7,10 @@ from Housekeeping import *
 
 
 class Load_BBB():
-	def __init__(self, configuration_identity):
+	def __init__(self, controller_identity):
 		self.sess = tf.Session()
-		meta_information_directory_copycat = configuration_identity + 'training/' + SAVED_FINAL_MODEL_DIRECTORY
-		best_model_directory_copycat = configuration_identity + 'training/' + SAVED_MODELS_DURING_ITERATIONS_DIRECTORY
+		meta_information_directory_copycat = controller_identity + 'training/' + SAVED_FINAL_MODEL_DIRECTORY
+		best_model_directory_copycat = controller_identity + 'training/' + SAVED_MODELS_DURING_ITERATIONS_DIRECTORY
 		imported_meta = tf.train.import_meta_graph(meta_information_directory_copycat + 'final.meta')
 		imported_meta.restore(self.sess, tf.train.latest_checkpoint(best_model_directory_copycat))
 		graph = tf.get_default_graph()
@@ -20,10 +20,10 @@ class Load_BBB():
 		self.deviation_of_predictions = graph.get_tensor_by_name('final_outputs/prediction_standard_deviation:0')
 		self.maximum_of_predictions = graph.get_tensor_by_name('final_outputs/prediction_maximum:0')
 		self.minimum_of_predictions = graph.get_tensor_by_name('final_outputs/prediction_minimum:0')
-		self.getMetaData(configuration_identity)
+		self.getMetaData(controller_identity)
 
-	def getMetaData(self, configuration_identity):
-		relevant_file_name = configuration_identity + 'training/' + 'training_meta_data.pkl'
+	def getMetaData(self, controller_identity):
+		relevant_file_name = controller_identity + 'training/' + 'training_meta_data.pkl'
 		with open(relevant_file_name, 'rb') as f:
 			stored_meta_data = pickle.load(f)
 		self.mean_x = stored_meta_data[MEAN_KEY_X]
@@ -33,8 +33,6 @@ class Load_BBB():
 		self.drift_per_time_step = stored_meta_data[DRIFT_PER_TIME_STEP_KEY]
 		self.moving_windows_x_size = stored_meta_data[MOVING_WINDOWS_X_SIZE_KEY]
 		self.window_size = stored_meta_data[WINDOW_SIZE_KEY]
-		self.tasks_trained_on = stored_meta_data[TASKS_TRAINED_ON_KEY]
-		self.tasks_encountered = stored_meta_data[TASKS_ENCOUNTERED_KEY]
 
 
 class Load_Demonstrator():

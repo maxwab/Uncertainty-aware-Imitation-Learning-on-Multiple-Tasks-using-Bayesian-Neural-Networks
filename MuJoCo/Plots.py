@@ -4,22 +4,70 @@ import numpy as np, os, sys, _pickle as pickle
 import sys
 #sys.path.insert(0,'./../Task_Agnostic_Online_Multitask_Imitation_Learning/')
 sys.path.insert(0,'./../')
+from Detector import get_smoothed_transform
 from Housekeeping import *
 
 
-def compare_data_efficiency(all_configurations, demonstration_request_to_gauge):
+def zoom_into_every_step(domain_name, detector_c, detector_m, demonstration_request_to_gauge, validation_task_to_plot):
+    simulation_iterator = 0
+
+    log_file = LOGS_DIRECTORY + domain_name + '/bbb_controller/detector_c_' + str(detector_c) + '_detector_m_' + str(detector_m) + '/' + str(simulation_iterator) + '/meta_data.pkl'
+    with open(log_file, 'rb') as f:
+        logged_evaluation_data = pickle.load(f)
+
+    adaptive_thresholds = logged_evaluation_data[DETECTOR_THRESHOLD_KEY]
+    tasks_trained_on_already = logged_evaluation_data[TASKS_TRAINED_ON_KEY]
+    tasks_encountered_so_far = logged_evaluation_data[TASKS_ENCOUNTERED_KEY]
+    tasks_training_iterations_so_far = logged_evaluation_data[TRAINING_TASK_ITERATION_KEY]
+
+    validation_logs_to_probe = LOGS_DIRECTORY + domain_name + '/bbb_controller/detector_c_' + detector_c + '_detector_m_' + detector_m + '/' + str(simulation_iterator) + '/' + str(logged_evaluation_data[TRAINING_TASK_ITERATION_KEY][demonstration_request_to_gauge-1]) + '/validation_logs.pkl'
+    #training_meta_data_file = LOGS_DIRECTORY + domain_name + '/bbb_controller/detector_c_' + detector_c + '_detector_m_' + detector_m + '/' + str(simulation_iterator) + '/' + str(logged_evaluation_data[TRAINING_TASK_ITERATION_KEY][demonstration_request_to_gauge-1]) + '/training/training_meta_data.pkl'
+
+    #with open(training_meta_data_file, 'rb') as f:
+    #    training_meta_data = pickle.load(f)
+
+    with open(validation_logs_to_probe, 'rb') as f:
+        logged_evaluation_data = pickle.load(f)
+    
+    for iterator, validation_task in enumerate(validation_task_to_plot):
+        for validation_trial in range(NUMBER_VALIDATION_TRIALS-1):
+            episodic_deviations = logged_evaluation_data[str(validation_task)][str(validation_trial)][BEHAVIORAL_CONTROL_DEVIATIONS_LOG_KEY]
+            #episodic_deviations = np.mean(np.array(episodic_deviations), axis=1)
+            #plt.plot(np.arange(0, episodic_deviations.shape[0], 1), episodic_deviations, linewidth=0.6, color=matplotlibcolors[iterator], alpha=1.0)
+            plt.plot(np.arange(0, episodic_deviations.shape[0], 1), get_smoothed_transform(input_array=episodic_deviations, domain_name=domain_name, smoothening_m=int(detector_m), scaling_c=float(detector_c)), linewidth=0.6, color=matplotlibcolors[iterator], alpha=1.0)
+        episodic_deviations = logged_evaluation_data[str(validation_task)][str(NUMBER_VALIDATION_TRIALS-1)][BEHAVIORAL_CONTROL_DEVIATIONS_LOG_KEY]
+        #episodic_deviations = np.mean(np.array(episodic_deviations), axis=1)
+        #plt.plot(np.arange(0, episodic_deviations.shape[0], 1), episodic_deviations, linewidth=0.6, color=matplotlibcolors[iterator], alpha=1.0)
+        plt.plot(np.arange(0, episodic_deviations.shape[0], 1), get_smoothed_transform(input_array=episodic_deviations, domain_name=domain_name, smoothening_m=int(detector_m), scaling_c=float(detector_c)), linewidth=0.6, color=matplotlibcolors[iterator], alpha=1.0, label='Task identity '+str(validation_task))
+    #plt.xticks(np.arange(0, len(task_rewards_to_plot), 1))          
+    plt.hlines(y=(float(detector_c)*adaptive_thresholds[demonstration_request_to_gauge-1]), xmin=0, xmax=episodic_deviations.shape[0], colors='k', linestyles='solid', linewidth=0.3, label='c*$\omega$(Adaptive Threshold)')
+    #plt.ylim(bottom=0.05, top=0.6) 
+    plt.xlabel('$r_d$', fontweight='bold')
+    plt.ylabel('$\sigma_d$', fontweight='bold')
+    plt.title('Relation between reward and uncertainty', fontsize=20)
+    plt.legend()
+    plt.show()
+    plt.close()
+
+    print('Adaptive thresholds are ' + str(adaptive_thresholds))
+    print('Tasks trained on already are ' + str(tasks_trained_on_already))
+    print('Tasks encountered so far are ' + str(tasks_encountered_so_far))
+    print('Training tasks iterations so far are ' + str(tasks_training_iterations_so_far))
+
+
+def compare_data_efficiency(domain_name, all_configurations, demonstration_request_to_gauge):
     simulation_iterator = 0
     x_axis_ticks = []
     cumulative_rewards_to_plot = []
     for configuration in all_configurations:
-        if configuration['controller'] == 'bbb_controller':    
-            log_file = LOGS_DIRECTORY + configuration['domain_name'] + '/bbb_controller/detector_c_' + str(configuration['detector_c']) + '_detector_m_' + str(configuration['detector_m']) + '/' + str(simulation_iterator) + '/meta_data.pkl'
-            with open(log_file, 'rb') as f:
-                logged_evaluation_data = pickle.load(f)
-            validation_logs_to_probe = LOGS_DIRECTORY + configuration['domain_name'] + '/bbb_controller/detector_c_' + str(configuration['detector_c']) + '_detector_m_' + str(configuration['detector_m']) + '/' + str(simulation_iterator) + '/' + str(logged_evaluation_data[TRAINING_TASK_ITERATION_KEY][demonstration_request_to_gauge-1]) + '/validation_logs.pkl'
+        if configuration['controller'] == 'BBB':    
+            training_meta_data_file = LOGS_DIRECTORY + domain_name + '/bbb_controller/detector_c_' + str(configuration['detector_c']) + '_detector_m_' + str(configuration['detector_m']) + '/' + str(simulation_iterator) + '/meta_data.pkl'
+            with open(training_meta_data_file, 'rb') as f:
+                training_meta_data = pickle.load(f)
+            validation_logs_to_probe = LOGS_DIRECTORY + domain_name + '/bbb_controller/detector_c_' + str(configuration['detector_c']) + '_detector_m_' + str(configuration['detector_m']) + '/' + str(simulation_iterator) + '/' + str(training_meta_data[TRAINING_TASK_ITERATION_KEY][demonstration_request_to_gauge-1]) + '/validation_logs.pkl'
             label = '$c=' + str(configuration['detector_c']) + '$\n$m=' + str(configuration['detector_m']) + '$'
-        elif configuration['controller'] == 'naive_controller':    
-            validation_logs_to_probe = LOGS_DIRECTORY + configuration['domain_name'] + '/naive_controller/' + str(simulation_iterator) + '/' + str(demonstration_request_to_gauge-1) + '/validation_logs.pkl'
+        elif configuration['controller'] == 'NAIVE':    
+            validation_logs_to_probe = LOGS_DIRECTORY + domain_name + '/naive_controller/' + str(simulation_iterator) + '/' + str(demonstration_request_to_gauge-1) + '/validation_logs.pkl'
             label = 'Naive'
         x_axis_ticks.append(label)
         cumulative_reward_over_all_tasks = 0.
@@ -38,24 +86,85 @@ def compare_data_efficiency(all_configurations, demonstration_request_to_gauge):
     plt.show()
 
 
-def compare_conservativeness(domain_name):
+def compare_conservativeness(domain_name, all_configurations):
+    simulation_iterator = 0
+    x_axis_ticks = []
+    cumulative_rewards_to_plot = []
+    number_requests_made_to_demonstrator = []
+    for configuration in all_configurations:
+        if configuration['controller'] == 'BBB':
+            training_meta_data_file = LOGS_DIRECTORY + domain_name + '/bbb_controller/detector_c_' + str(configuration['detector_c']) + '_detector_m_' + str(configuration['detector_m']) + '/' + str(simulation_iterator) + '/meta_data.pkl'
+            with open(training_meta_data_file, 'rb') as f:
+                training_meta_data = pickle.load(f)
+            number_requests_made_to_demonstrator.append(len(training_meta_data[TRAINING_TASK_ITERATION_KEY]))
+            validation_logs_to_probe = LOGS_DIRECTORY + domain_name + '/bbb_controller/detector_c_' + str(configuration['detector_c']) + '_detector_m_' + str(configuration['detector_m']) + '/' + str(simulation_iterator) + '/' + str(len(ALL_MUJOCO_TASK_IDENTITIES)-1) + '/validation_logs.pkl'
+            label = '$c=' + str(configuration['detector_c']) + '$\n$m=' + str(configuration['detector_m']) + '$'
+        elif configuration['controller'] == 'NAIVE':
+            validation_logs_to_probe = LOGS_DIRECTORY + domain_name + '/naive_controller/' + str(simulation_iterator) + '/' + str(len(ALL_MUJOCO_TASK_IDENTITIES)-1) + '/validation_logs.pkl'
+            number_requests_made_to_demonstrator.append(len(ALL_MUJOCO_TASK_IDENTITIES))
+            label = 'Naive'
+        x_axis_ticks.append(label)
+        cumulative_reward_over_all_tasks = 0.
+        with open(validation_logs_to_probe, 'rb') as f:
+            logged_evaluation_data = pickle.load(f)
+        for validation_task in ALL_MUJOCO_TASK_IDENTITIES:
+            episodic_rewards = [logged_evaluation_data[str(validation_task)][str(validation_trial)][BEHAVIORAL_CONTROL_REWARDS_LOG_KEY] for validation_trial in range(NUMBER_VALIDATION_TRIALS)]
+            episodic_rewards = np.array(episodic_rewards)
+            cumulative_reward_over_all_tasks += np.sum(np.mean(episodic_rewards, axis=0))
+        cumulative_rewards_to_plot.append(cumulative_reward_over_all_tasks)
+    plt.bar(x_axis_ticks, cumulative_rewards_to_plot)
+    plt.xlabel('Configuration', fontweight='bold')
+    plt.ylabel('$\sum_d^D$', fontweight='bold')
+    plt.title('Data-Efficiency', fontsize=18)
+    plt.legend()
+    plt.show()
+
+    plt.bar(x_axis_ticks, number_requests_made_to_demonstrator)
+    plt.xlabel('Configuration', fontweight='bold')
+    plt.ylabel('# Requests', fontweight='bold')
+    plt.title('Tuning conservativeness', fontsize=18)
+    plt.legend()
+    plt.show()
+
+
+def is_uncertainty_proxy_for_reward(domain_name, detector_c, detector_m, demonstration_request_to_gauge):
     simulation_iterator = 0
 
-    #log_file = LOGS_DIRECTORY + domain_name + '/naive_controller/' + str(simulation_iterator) + '/meta_data.pkl'
-    #with open(log_file, 'rb') as f:
-    #    logged_evaluation_data = pickle.load(f)
-    #last_trained_task = logged_evaluation_data[TRAINING_TASK_ITERATION_KEY] 
-
-    log_file = LOGS_DIRECTORY + domain_name + '/naive_controller/' + str(simulation_iterator) + '/' + str(len(ALL_MUJOCO_TASK_IDENTITIES)-1) + '/validation_logs.pkl'
-    cumulative_reward_over_all_tasks = 0.
+    log_file = LOGS_DIRECTORY + domain_name + '/bbb_controller/detector_c_' + str(detector_c) + '_detector_m_' + str(detector_m) + '/' + str(simulation_iterator) + '/meta_data.pkl'
     with open(log_file, 'rb') as f:
         logged_evaluation_data = pickle.load(f)
+    #tasks_trained_on_already = logged_evaluation_data[TASKS_TRAINED_ON_KEY]
+    #tasks_encountered_so_far = logged_evaluation_data[TASKS_ENCOUNTERED_KEY]
 
-    for validation_task in ALL_MUJOCO_TASK_IDENTITIES:
+    validation_logs_to_probe = LOGS_DIRECTORY + domain_name + '/bbb_controller/detector_c_' + detector_c + '_detector_m_' + detector_m + '/' + str(simulation_iterator) + '/' + str(logged_evaluation_data[TRAINING_TASK_ITERATION_KEY][demonstration_request_to_gauge-1]) + '/validation_logs.pkl'
+
+    log_file = LOGS_DIRECTORY + domain_name + '/bbb_controller/detector_c_' + str(detector_c) + '_detector_m_' + str(detector_m) + '/' + str(simulation_iterator) + '/' + str(logged_evaluation_data[TRAINING_TASK_ITERATION_KEY][demonstration_request_to_gauge-1]) + '/training/training_meta_data.pkl'
+    with open(log_file, 'rb') as f:
+        logged_evaluation_data = pickle.load(f)
+    tasks_trained_on_already = logged_evaluation_data[TASKS_TRAINED_ON_KEY]
+    tasks_encountered_so_far = logged_evaluation_data[TASKS_ENCOUNTERED_KEY]
+
+    with open(validation_logs_to_probe, 'rb') as f:
+        logged_evaluation_data = pickle.load(f)
+    
+    for iterator, validation_task in enumerate(ALL_MUJOCO_TASK_IDENTITIES):
         episodic_rewards = [logged_evaluation_data[str(validation_task)][str(validation_trial)][BEHAVIORAL_CONTROL_REWARDS_LOG_KEY] for validation_trial in range(NUMBER_VALIDATION_TRIALS)]
         episodic_rewards = np.array(episodic_rewards)
-        cumulative_reward_over_all_tasks += np.sum(np.mean(episodic_rewards, axis=0))
-        break
+        task_rewards_to_plot = np.sum(episodic_rewards, axis=1)
+        episodic_deviations = [logged_evaluation_data[str(validation_task)][str(validation_trial)][BEHAVIORAL_CONTROL_DEVIATIONS_LOG_KEY] for validation_trial in range(NUMBER_VALIDATION_TRIALS)]
+        episodic_deviations = np.array(episodic_deviations)
+        task_deviations_to_plot = np.sum(np.mean(episodic_deviations, axis=2), axis=1)
+        plt.scatter(task_rewards_to_plot, task_deviations_to_plot, color=matplotlibcolors[iterator], alpha=0.99, label='Task identity '+str(validation_task))
+    #plt.xticks(np.arange(0, len(task_rewards_to_plot), 1))          
+    #plt.ylim(bottom=200.0, top=550.0) 
+    plt.xlabel('$r_d$', fontweight='bold')
+    plt.ylabel('$\sigma_d$', fontweight='bold')
+    plt.title('Relation between reward and uncertainty')
+    plt.legend()
+    plt.show()
+
+    print('Tasks trained on already are ' + str(tasks_trained_on_already))
+    print('Tasks encountered so far are ' + str(tasks_encountered_so_far))
 
 
 def plotDemonstrators(env_name, demonstrator_rewards_over_all_contexts, identifier):
